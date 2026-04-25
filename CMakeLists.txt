@@ -20,4 +20,5 @@ project(RTRTClock VERSION 0.1.0
 
 pico_sdk_init()
 
+add_subdirectory(libs)
 add_subdirectory(app)
