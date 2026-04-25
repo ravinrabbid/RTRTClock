@@ -3,7 +3,7 @@
 
 #include "StaticTask.hpp"
 
-namespace Piclock::Tasks {
+namespace RTRTClock::Tasks {
 
 class LedBlinkTask : public StaticTask<configMINIMAL_STACK_SIZE> {
   private:
@@ -17,6 +17,6 @@ class LedBlinkTask : public StaticTask<configMINIMAL_STACK_SIZE> {
         : StaticTask{"Led Task", priority}, m_pin{pin}, m_frequency{frequency} {};
 };
 
-} // namespace Piclock::Tasks
+} // namespace RTRTClock::Tasks
 
 #endif // TASKS_LEDBLINKTASK_H_

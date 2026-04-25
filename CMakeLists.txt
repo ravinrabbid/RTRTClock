@@ -15,8 +15,8 @@ endif()
 
 include(cmake/pico_sdk_import.cmake)
 
-project(piclock VERSION 0.1.0
-                LANGUAGES C CXX ASM)
+project(RTRTClock VERSION 0.1.0
+                  LANGUAGES C CXX ASM)
 
 pico_sdk_init()
 

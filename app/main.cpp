@@ -8,7 +8,7 @@
 #include "utils/run_time_stats.h"
 #endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 
-using namespace Piclock;
+using namespace RTRTClock;
 
 namespace {
 
@@ -33,7 +33,7 @@ void launch_tasks() {
 int main() {
     stdio_init_all();
 
-    printf("Starting piclock\n");
+    printf("Starting RTRTClock\n");
 
     launch_tasks();
 

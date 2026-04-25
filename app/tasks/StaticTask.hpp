@@ -6,7 +6,7 @@
 
 #include <string>
 
-namespace Piclock::Tasks {
+namespace RTRTClock::Tasks {
 
 template <size_t STACK_SIZE> class StaticTask {
   private:
@@ -48,6 +48,6 @@ template <size_t STACK_SIZE> class StaticTask {
     [[nodiscard]] TaskHandle_t getTaskHandle() const { return m_handle; }
 };
 
-} // namespace Piclock::Tasks
+} // namespace RTRTClock::Tasks
 
 #endif // TASKS_DETAIL_STATICTASK_HPP_

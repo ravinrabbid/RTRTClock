@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-namespace Piclock::Utils::RunTimeStats {
+namespace RTRTClock::Utils::RunTimeStats {
 
 namespace {
 
@@ -32,6 +32,6 @@ void print_stats_task_create() {
                       tskIDLE_PRIORITY + 1UL, print_stats_task_stack, &print_stats_task_buffer);
 }
 
-} // namespace Piclock::Utils::RunTimeStats
+} // namespace RTRTClock::Utils::RunTimeStats
 
 uint32_t get_run_time_counter_value() { return time_us_32(); }

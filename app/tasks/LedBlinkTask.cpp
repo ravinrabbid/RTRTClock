@@ -2,7 +2,7 @@
 
 #include "hardware/gpio.h"
 
-namespace Piclock::Tasks {
+namespace RTRTClock::Tasks {
 
 namespace {
 
@@ -28,4 +28,4 @@ void LedBlinkTask::taskFunc() {
     }
 }
 
-} // namespace Piclock::Tasks
+} // namespace RTRTClock::Tasks
