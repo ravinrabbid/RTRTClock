@@ -3,6 +3,11 @@
 #include "pico/stdlib.h"
 
 #include <stdio.h>
+
+#if (DEBUG_PRINT_RUNTIMESTATS == 1)
+#include "utils/run_time_stats.h"
+#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
+
 using namespace Piclock;
 
 namespace {
@@ -15,6 +20,10 @@ void launch_tasks() {
 
     led_task.create();
     led_task2.create();
+
+#if (DEBUG_PRINT_RUNTIMESTATS == 1)
+    Utils::RunTimeStats::print_stats_task_create();
+#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 
     vTaskStartScheduler();
 }

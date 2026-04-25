@@ -69,7 +69,11 @@
 
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         1
+#if ( DEBUG_PRINT_RUNTIMESTATS == 1 )
+#define configSUPPORT_DYNAMIC_ALLOCATION        1
+#else
 #define configSUPPORT_DYNAMIC_ALLOCATION        0
+#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 #define configTOTAL_HEAP_SIZE                   (128*1024)
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
@@ -79,9 +83,26 @@
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 
 /* Run time and task stats gathering related definitions. */
+#if ( DEBUG_PRINT_RUNTIMESTATS == 1 )
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+uint32_t get_run_time_counter_value();
+#ifdef __cplusplus
+}
+#endif
+
+#define configGENERATE_RUN_TIME_STATS           1
+#define configUSE_TRACE_FACILITY                1
+#define configUSE_STATS_FORMATTING_FUNCTIONS    1
+#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()
+#define portGET_RUN_TIME_COUNTER_VALUE()        get_run_time_counter_value()
+#else
 #define configGENERATE_RUN_TIME_STATS           0
 #define configUSE_TRACE_FACILITY                0
 #define configUSE_STATS_FORMATTING_FUNCTIONS    0
+#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 
 /* Co-routine related definitions. */
 #define configUSE_CO_ROUTINES                   0
@@ -94,7 +115,7 @@
 #define configTIMER_TASK_STACK_DEPTH            1024
 
 /* Interrupt nesting behaviour configuration. */
-#define configPRIO_BITS       2
+#define configPRIO_BITS                         2
 #define configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY 2
 #define configLIBRARY_LOWEST_INTERRUPT_PRIORITY ((1<<configPRIO_BITS) - 1)
 #define configKERNEL_INTERRUPT_PRIORITY         ( configLIBRARY_LOWEST_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )

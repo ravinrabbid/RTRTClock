@@ -1,8 +1,11 @@
 set(APP_NAME "${PROJECT_NAME}")
 
+option(USE_DEBUG_PRINT_RUNTIMESTATS "Print task run-time statistics on serial" OFF)
+
 include("${CMAKE_SOURCE_DIR}/cmake/FreeRTOS_Kernel_import.cmake")
 
 set(${APP_NAME}_SOURCES
+    $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:utils/run_time_stats.cpp>
     main.cpp
     tasks/LedBlinkTask.cpp
     )
@@ -18,7 +21,8 @@ target_include_directories(${APP_NAME} PRIVATE
 target_link_libraries(${APP_NAME} PRIVATE
     FreeRTOS-Kernel-Static
     pico_stdlib
-    # ${PROJECT_NAME}_tasks
+    $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:FreeRTOS-Kernel-Heap4>
+    $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:hardware_timer>
     )
 
 set_target_properties(${APP_NAME} PROPERTIES
@@ -29,6 +33,12 @@ set_target_properties(${APP_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
 )
+
+
+target_compile_definitions(${APP_NAME} PRIVATE
+    $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:DEBUG_PRINT_RUNTIMESTATS=1>
+)
+
 
 # Set COMPILE_OPTIONS on source files directly
 # to avoid errors pulled in from pico-sdk/FreeRTOS sources
