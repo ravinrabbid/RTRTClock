@@ -84,25 +84,39 @@ void Display::clearFrame() {
     std::fill(m_send_buffer.begin() + 1, m_send_buffer.end(), 0x00);
 }
 
-void Display::putFrame(Frame_t frame) {
-    const uint8_t frame_bytes_per_row = WIDTH / 8;
+void Display::putFrame(Frame_t frame) { putTile(frame, 0, 0, WIDTH, HEIGHT); }
 
-    for (uint8_t row = 0; row < HEIGHT; ++row) {
-        const uint8_t page = row / 8;
-        const uint8_t bit = row % 8;
+void Display::putTile(Tile_t tile, int16_t x, int16_t y, uint8_t width,
+                      uint8_t height) {
 
-        for (uint8_t column = 0; column < WIDTH; ++column) {
-            const uint16_t frame_byte =
-                row * frame_bytes_per_row + (column / 8);
-            const uint8_t frame_bit = 7 - (column % 8);
-            const bool pixel = (frame[frame_byte] >> frame_bit) & 0x01;
+    const uint8_t tile_bytes_per_row = (width + 7) / 8;
+
+    for (uint8_t tile_row = 0; tile_row < height; ++tile_row) {
+        const int16_t buffer_row = y + tile_row;
+        if (buffer_row < 0 || buffer_row >= HEIGHT) {
+            continue;
+        }
+
+        const uint8_t buffer_page = static_cast<uint8_t>(buffer_row) / 8;
+        const uint8_t buffer_page_bit = static_cast<uint8_t>(buffer_row) % 8;
+
+        for (uint8_t tile_column = 0; tile_column < width; ++tile_column) {
+            const int16_t buffer_column = x + tile_column;
+            if (buffer_column < 0 || buffer_column >= WIDTH) {
+                continue;
+            }
+
+            const uint16_t tile_byte =
+                tile_row * tile_bytes_per_row + (tile_column / 8);
+            const uint8_t tile_bit = 7 - (tile_column % 8);
+            const bool pixel = (tile[tile_byte] >> tile_bit) & 0x01;
 
             if (pixel) {
-                m_send_buffer[page * WIDTH + column + 1] |=
-                    static_cast<std::uint8_t>(1 << bit);
+                m_send_buffer[buffer_page * WIDTH + buffer_column + 1] |=
+                    static_cast<std::uint8_t>(1 << buffer_page_bit);
             } else {
-                m_send_buffer[page * WIDTH + column + 1] &=
-                    static_cast<std::uint8_t>(~(1 << bit));
+                m_send_buffer[buffer_page * WIDTH + buffer_column + 1] &=
+                    static_cast<std::uint8_t>(~(1 << buffer_page_bit));
             }
         }
     }

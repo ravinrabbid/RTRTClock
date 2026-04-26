@@ -16,6 +16,7 @@ class Display {
     static const size_t FRAME_SIZE = PAGES * WIDTH;
 
     using Frame_t = std::span<const uint8_t, FRAME_SIZE>;
+    using Tile_t = std::span<const uint8_t>;
 
     enum class Control : uint8_t {
         COMMAND = 0x00,
@@ -96,6 +97,8 @@ class Display {
 
     void clearFrame();
     void putFrame(Frame_t frame);
+    void putTile(Tile_t tile, int16_t x, int16_t y, uint8_t width,
+                 uint8_t height);
     void putPixel(uint8_t x, uint8_t y, bool pixel);
 
     void powerOn();
