@@ -1,4 +1,7 @@
 #include "tasks/LedBlinkTask.h"
+#include "tasks/StartUpTask.h"
+
+#include "pico_ssd1306_cpp/Ssd1306.h"
 
 #include "pico/stdlib.h"
 
@@ -12,8 +15,12 @@ using namespace RTRTClock;
 
 namespace {
 
-Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 2UL, PICO_DEFAULT_LED_PIN, 200};
-Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 2UL, PICO_DEFAULT_LED_PIN, 500};
+Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 2UL, 200};
+Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 2UL, 500};
+
+std::array tasks{std::ref<Tasks::Task>(led_task),
+                 std::ref<Tasks::Task>(led_task2)};
+Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks};
 
 void launch_tasks() {
     printf("Launching tasks\n");

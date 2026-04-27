@@ -8,6 +8,7 @@ set(${APP_NAME}_SOURCES
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:utils/run_time_stats.cpp>
     main.cpp
     tasks/LedBlinkTask.cpp
+    tasks/StartUpTask.cpp
     )
 
 add_executable(${APP_NAME}
@@ -19,10 +20,12 @@ target_include_directories(${APP_NAME} PRIVATE
     )
 
 target_link_libraries(${APP_NAME} PRIVATE
-    FreeRTOS-Kernel-Static
     pico_stdlib
-    $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:FreeRTOS-Kernel-Heap4>
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:hardware_timer>
+    pico_cyw43_arch_lwip_sys_freertos
+    FreeRTOS-Kernel-Static
+    FreeRTOS-Kernel-Heap4
+    pico_ssd1306_cpp
     )
 
 set_target_properties(${APP_NAME} PROPERTIES

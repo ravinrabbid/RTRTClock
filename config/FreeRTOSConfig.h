@@ -60,7 +60,7 @@
 #define configUSE_QUEUE_SETS                    1
 #define configUSE_TIME_SLICING                  1
 #define configUSE_NEWLIB_REENTRANT              0
-#define configENABLE_BACKWARD_COMPATIBILITY     0
+#define configENABLE_BACKWARD_COMPATIBILITY     1
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 
 /* System */
@@ -69,11 +69,7 @@
 
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         1
-#if ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#else
-#define configSUPPORT_DYNAMIC_ALLOCATION        0
-#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 #define configTOTAL_HEAP_SIZE                   (128*1024)
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
