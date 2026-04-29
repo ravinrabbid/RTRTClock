@@ -12,6 +12,7 @@ set(${APP_NAME}_SOURCES
     main.cpp
     tasks/LedBlinkTask.cpp
     tasks/NtpClientTask.cpp
+    tasks/RtcTask.cpp
     tasks/StartUpTask.cpp
     )
 
@@ -21,10 +22,12 @@ add_executable(${APP_NAME}
 
 target_include_directories(${APP_NAME} PRIVATE
     "${CMAKE_SOURCE_DIR}/config"
+    "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
 target_link_libraries(${APP_NAME} PRIVATE
     pico_stdlib
+    hardware_rtc
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:hardware_timer>
     pico_cyw43_arch_lwip_sys_freertos
     FreeRTOS-Kernel-Static

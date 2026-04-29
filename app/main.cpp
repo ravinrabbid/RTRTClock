@@ -6,7 +6,7 @@
 
 #include "pico/stdlib.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 #if (DEBUG_PRINT_RUNTIMESTATS == 1)
 #include "utils/run_time_stats.h"
@@ -21,19 +21,20 @@ inline constexpr uint32_t NTP_UPDATE_INTVERVAL = 60 * 60 * 1000;
 
 Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 2UL, 200};
 Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 2UL, 500};
+Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL};
 Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL, NTP_SERVER,
-                                     NTP_UPDATE_INTVERVAL};
+                                     NTP_UPDATE_INTVERVAL,
+                                     rtc_task.get_update_signal()};
 
-std::array tasks{std::ref<Tasks::Task>(led_task),
-                 std::ref<Tasks::Task>(led_task2),
-                 std::ref<Tasks::Task>(ntp_client_task)};
+std::array tasks{
+    std::ref<Tasks::Task>(led_task), std::ref<Tasks::Task>(led_task2),
+    std::ref<Tasks::Task>(rtc_task), std::ref<Tasks::Task>(ntp_client_task)};
 Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks};
 
 void launch_tasks() {
     printf("Launching tasks\n");
 
-    led_task.create();
-    led_task2.create();
+    startup_task.create();
 
 #if (DEBUG_PRINT_RUNTIMESTATS == 1)
     Utils::RunTimeStats::print_stats_task_create();

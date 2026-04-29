@@ -5,11 +5,13 @@
 #include "lwip/ip_addr.h"
 #include "lwip/netdb.h"
 
+#include "hardware/rtc.h"
+#include "pico/util/datetime.h"
+
 #include <cstdarg>
+#include <cstdio>
 #include <cstring>
-#include <ctime>
 #include <memory>
-#include <stdio.h>
 
 namespace RTRTClock::Tasks {
 
@@ -48,8 +50,7 @@ using netbuf_ptr =
 } // namespace
 
 void NtpClientTask::taskFunc() {
-    const TickType_t frequency =
-        pdMS_TO_TICKS(m_update_interval); // Check time every hour
+    const TickType_t period = pdMS_TO_TICKS(m_update_interval);
     TickType_t last_wake_time = xTaskGetTickCount();
 
     const auto print_and_delay = [](const char *fmt, ...) {
@@ -66,7 +67,6 @@ void NtpClientTask::taskFunc() {
     request.li_vn_mode = (0u << 6) | (4u << 3) | 3u;
 
     while (true) {
-
         // Resolve hostname
         ip_addr_t ntp_addr{};
         const err_t resolve_err =
@@ -150,15 +150,11 @@ void NtpClientTask::taskFunc() {
         const uint32_t ntp_seconds = ntohl(response.tx_ts_sec);
         auto unix_time = static_cast<time_t>(ntp_seconds - NTP_DELTA);
 
-        tm date_time{};
-        gmtime_r(&unix_time, &date_time);
+        datetime_t datetime;
+        time_to_datetime(unix_time, &datetime);
+        m_rtc_update_signal->signal(datetime);
 
-        printf("NTP response: %02d/%02d/%04d %02d:%02d:%02d\n",
-               date_time.tm_mday, date_time.tm_mon + 1,
-               date_time.tm_year + 1900, date_time.tm_hour, date_time.tm_min,
-               date_time.tm_sec);
-
-        xTaskDelayUntil(&last_wake_time, frequency);
+        xTaskDelayUntil(&last_wake_time, period);
     }
 }
 
