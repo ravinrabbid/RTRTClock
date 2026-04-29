@@ -1,4 +1,5 @@
 #include "tasks/LedBlinkTask.h"
+#include "tasks/NtpClientTask.h"
 #include "tasks/StartUpTask.h"
 
 #include "pico_ssd1306_cpp/Ssd1306.h"
@@ -15,11 +16,17 @@ using namespace RTRTClock;
 
 namespace {
 
+inline constexpr std::string NTP_SERVER = "pool.ntp.org";
+inline constexpr uint32_t NTP_UPDATE_INTVERVAL = 60 * 60 * 1000;
+
 Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 2UL, 200};
 Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 2UL, 500};
+Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL, NTP_SERVER,
+                                     NTP_UPDATE_INTVERVAL};
 
 std::array tasks{std::ref<Tasks::Task>(led_task),
-                 std::ref<Tasks::Task>(led_task2)};
+                 std::ref<Tasks::Task>(led_task2),
+                 std::ref<Tasks::Task>(ntp_client_task)};
 Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks};
 
 void launch_tasks() {
@@ -33,6 +40,8 @@ void launch_tasks() {
 #endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 
     vTaskStartScheduler();
+
+    panic("\"vTaskStartScheduler\" should never return");
 }
 
 } // namespace

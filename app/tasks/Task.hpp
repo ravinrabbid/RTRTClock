@@ -17,8 +17,8 @@ class Task {
     virtual TaskHandle_t internalCreate() = 0;
 
   protected:
-    std::string m_name;
-    UBaseType_t m_priority;
+    const std::string m_name;
+    const UBaseType_t m_priority;
 
     static void runTaskFunc(void *params) {
         reinterpret_cast<Task *>(params)->taskFunc();

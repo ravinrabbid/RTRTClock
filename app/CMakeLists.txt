@@ -2,12 +2,16 @@ set(APP_NAME "${PROJECT_NAME}")
 
 option(USE_DEBUG_PRINT_RUNTIMESTATS "Print task run-time statistics on serial" OFF)
 
+set(WIFI_SSID "${WIFI_SSID}" CACHE INTERNAL "WiFi SSID")
+set(WIFI_PASSWORD "${WIFI_PASSWORD}" CACHE INTERNAL "WiFi password")
+
 include("${CMAKE_SOURCE_DIR}/cmake/FreeRTOS_Kernel_import.cmake")
 
 set(${APP_NAME}_SOURCES
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:utils/run_time_stats.cpp>
     main.cpp
     tasks/LedBlinkTask.cpp
+    tasks/NtpClientTask.cpp
     tasks/StartUpTask.cpp
     )
 
@@ -39,6 +43,8 @@ set_target_properties(${APP_NAME} PROPERTIES
 
 
 target_compile_definitions(${APP_NAME} PRIVATE
+    WIFI_SSID=\"${WIFI_SSID}\"
+    WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:DEBUG_PRINT_RUNTIMESTATS=1>
 )
 

@@ -30,7 +30,7 @@
 #define LWIP_NETIF_STATUS_CALLBACK 1
 #define LWIP_NETIF_LINK_CALLBACK 1
 #define LWIP_NETIF_HOSTNAME 1
-#define LWIP_NETCONN 0
+#define LWIP_NETCONN 1
 #define MEM_STATS 0
 #define SYS_STATS 0
 #define MEMP_STATS 0
@@ -47,6 +47,10 @@
 #define DHCP_DOES_ARP_CHECK 0
 #define LWIP_DHCP_DOES_ACD_CHECK 0
 
+// TODO figure out if those should be set. Probably only relevant to
+// prevent package starvation but nobody seems to use them. 
+// #define TCPIP_THREAD_PRIO (configMAX_PRIORITIES - 2)
+// #define DEFAULT_THREAD_PRIO (configMAX_PRIORITIES - 3)
 #define TCPIP_THREAD_STACKSIZE 1024
 #define DEFAULT_THREAD_STACKSIZE 1024
 #define DEFAULT_RAW_RECVMBOX_SIZE 8
@@ -55,7 +59,6 @@
 #define TCPIP_MBOX_SIZE 8
 #define LWIP_TIMEVAL_PRIVATE 0
 
-// not necessary, can be done either way
 #define LWIP_TCPIP_CORE_LOCKING_INPUT 1
 
 #define LWIP_SO_RCVTIMEO 1

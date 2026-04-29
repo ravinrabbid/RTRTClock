@@ -8,7 +8,7 @@
 
 namespace RTRTClock::Tasks {
 
-class StartUpTask : public StaticTask<configMINIMAL_STACK_SIZE> {
+class StartUpTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
   private:
     std::span<std::reference_wrapper<Task>> m_tasks;
 
