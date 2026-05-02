@@ -1,2 +1,1 @@
-add_subdirectory(pico_ssd1306_cpp)
 add_subdirectory(pico_u8g2)

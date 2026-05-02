@@ -2,8 +2,6 @@
 #include "tasks/NtpClientTask.h"
 #include "tasks/StartUpTask.h"
 
-#include "pico_ssd1306_cpp/Ssd1306.h"
-
 #include "pico/stdlib.h"
 
 #include <cstdio>

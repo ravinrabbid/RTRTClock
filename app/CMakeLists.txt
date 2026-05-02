@@ -33,7 +33,6 @@ target_link_libraries(${APP_NAME} PRIVATE
     FreeRTOS-Kernel-Static
     FreeRTOS-Kernel-Heap4
     pico_u8g2
-    pico_ssd1306_cpp
     )
 
 set_target_properties(${APP_NAME} PROPERTIES
