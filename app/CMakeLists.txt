@@ -13,6 +13,7 @@ set(${APP_NAME}_SOURCES
     tasks/LedBlinkTask.cpp
     tasks/NtpClientTask.cpp
     tasks/RtcTask.cpp
+    tasks/DisplayTask.cpp
     tasks/StartUpTask.cpp
     )
 

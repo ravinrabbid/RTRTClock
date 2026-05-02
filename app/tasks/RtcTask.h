@@ -7,7 +7,7 @@
 
 namespace RTRTClock::Tasks {
 
-class RtcTask : public StaticTask<configMINIMAL_STACK_SIZE + 512> {
+class RtcTask : public StaticTask<configMINIMAL_STACK_SIZE + 64> {
   public:
     using signal_t = Utils::Signal<datetime_t>;
 

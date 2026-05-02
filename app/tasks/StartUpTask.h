@@ -17,7 +17,7 @@ class StartUpTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
   public:
     StartUpTask(UBaseType_t priority,
                 std::span<std::reference_wrapper<Task>> tasks)
-        : StaticTask{"Start Up Task", priority}, m_tasks{std::move(tasks)} {};
+        : StaticTask{"Start Up Task", priority}, m_tasks{tasks} {};
 };
 
 } // namespace RTRTClock::Tasks

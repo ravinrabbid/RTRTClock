@@ -1,3 +1,4 @@
+#include "tasks/DisplayTask.h"
 #include "tasks/LedBlinkTask.h"
 #include "tasks/NtpClientTask.h"
 #include "tasks/StartUpTask.h"
@@ -17,16 +18,27 @@ namespace {
 inline constexpr std::string NTP_SERVER = "pool.ntp.org";
 inline constexpr uint32_t NTP_UPDATE_INTVERVAL = 60 * 60 * 1000;
 
+inline constexpr Tasks::DisplayTask::Config DISPLAY_CONFIG = {
+    .i2c_block = i2c1,
+    .i2c_address = 0x3C,
+    .i2c_baudrate_hz = 1'000'000,
+    .i2c_sda_pin = 2,
+    .i2c_scl_pin = 3,
+    .rotation = Tasks::DisplayTask::Config::Rotation::DEG_0,
+};
+
 Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 2UL, 200};
 Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 2UL, 500};
 Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL};
 Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL, NTP_SERVER,
                                      NTP_UPDATE_INTVERVAL,
                                      rtc_task.get_update_signal()};
+Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 2UL, DISPLAY_CONFIG};
 
 std::array tasks{
     std::ref<Tasks::Task>(led_task), std::ref<Tasks::Task>(led_task2),
-    std::ref<Tasks::Task>(rtc_task), std::ref<Tasks::Task>(ntp_client_task)};
+    std::ref<Tasks::Task>(rtc_task), std::ref<Tasks::Task>(ntp_client_task),
+    std::ref<Tasks::Task>(display_task)};
 Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks};
 
 void launch_tasks() {

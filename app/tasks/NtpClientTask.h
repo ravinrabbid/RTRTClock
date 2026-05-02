@@ -23,7 +23,7 @@ class NtpClientTask : public StaticTask<configMINIMAL_STACK_SIZE + 256> {
         : StaticTask{"NTP Client Task", priority},
           m_ntp_server(std::move(ntp_server)),
           m_update_interval(update_interval),
-          m_rtc_update_signal(rtc_update_signal) {};
+          m_rtc_update_signal(std::move(rtc_update_signal)) {};
 };
 
 } // namespace RTRTClock::Tasks

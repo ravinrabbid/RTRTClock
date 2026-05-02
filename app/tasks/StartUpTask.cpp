@@ -24,7 +24,7 @@ void connect_wifi() {
 } // namespace
 
 void StartUpTask::taskFunc() {
-    vTaskDelay(pdTICKS_TO_MS(5000));
+    vTaskDelay(pdTICKS_TO_MS(2000));
 
     if (cyw43_arch_init() != 0) {
         panic("cyw43_arch_init failed");
