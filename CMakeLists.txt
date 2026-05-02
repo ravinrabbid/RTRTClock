@@ -13,6 +13,10 @@ if((NOT DEFINED ENV{FREERTOS_KERNEL_PATH}) AND (NOT FREERTOS_KERNEL_PATH))
     set(FREERTOS_KERNEL_PATH "${CMAKE_SOURCE_DIR}/extern/FreeRTOS-Kernel")
 endif()
 
+if((NOT DEFINED ENV{U8G2_PATH}) AND (NOT U8G2_PATH))
+    set(U8G2_PATH "${CMAKE_SOURCE_DIR}/extern/u8g2")
+endif()
+
 include(cmake/pico_sdk_import.cmake)
 
 project(RTRTClock VERSION 0.1.0

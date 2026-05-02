@@ -26,12 +26,13 @@ target_include_directories(${APP_NAME} PRIVATE
     )
 
 target_link_libraries(${APP_NAME} PRIVATE
-    pico_stdlib
-    hardware_rtc
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:hardware_timer>
+    hardware_rtc
+    pico_stdlib
     pico_cyw43_arch_lwip_sys_freertos
     FreeRTOS-Kernel-Static
     FreeRTOS-Kernel-Heap4
+    pico_u8g2
     pico_ssd1306_cpp
     )
 
@@ -48,6 +49,7 @@ set_target_properties(${APP_NAME} PROPERTIES
 target_compile_definitions(${APP_NAME} PRIVATE
     WIFI_SSID=\"${WIFI_SSID}\"
     WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+    U8G2_WITHOUT_INTERSECTION=1
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:DEBUG_PRINT_RUNTIMESTATS=1>
 )
 
