@@ -26,7 +26,9 @@ inline constexpr Tasks::DisplayTask::Config DISPLAY_CONFIG = {
     .i2c_baudrate_hz = 1'000'000,
     .i2c_sda_pin = 2,
     .i2c_scl_pin = 3,
+
     .rotation = Tasks::DisplayTask::Config::Rotation::DEG_0,
+    .contrast = 1,
 };
 
 } // namespace RTRTClock::Config

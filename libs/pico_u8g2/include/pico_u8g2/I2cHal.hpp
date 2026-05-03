@@ -31,6 +31,7 @@ class I2cHal {
         uint i2c_scl_pin;
 
         Rotation rotation;
+        uint8_t contrast;
     };
 
     using u8g2_setup_fn_t = std::function<void(u8g2_t *, const u8g2_cb_t *,
@@ -58,8 +59,13 @@ class I2cHal {
     I2cHal(I2cHal &&) = delete;
     I2cHal &operator=(I2cHal &&) = delete;
 
-    uint16_t displayWidth() { return u8g2_GetDisplayWidth(&m_u8g2); };
-    uint16_t displayHeight() { return u8g2_GetDisplayHeight(&m_u8g2); };
+    uint16_t displayWidth() const { return u8g2_GetDisplayWidth(&m_u8g2); };
+    uint16_t displayHeight() const { return u8g2_GetDisplayHeight(&m_u8g2); };
+
+    void powerOn() { u8g2_SetPowerSave(&m_u8g2, false); };
+    void powerOff() { u8g2_SetPowerSave(&m_u8g2, true); };
+
+    void setContrast(uint8_t contrast) { u8g2_SetContrast(&m_u8g2, contrast); };
 
     template <typename Ret, typename... FnArgs, typename... Args>
         requires(std::convertible_to<Args, FnArgs> && ...)

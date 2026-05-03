@@ -118,6 +118,7 @@ I2cHal::I2cHal(const Config &config, u8g2_setup_fn_t setup_fn)
     u8g2_SetUserPtr(&m_u8g2, (void *)this);
     u8g2_InitDisplay(&m_u8g2);
     u8g2_ClearDisplay(&m_u8g2);
+    u8g2_SetContrast(&m_u8g2, m_config.contrast);
     u8g2_SetPowerSave(&m_u8g2, 0);
 };
 } // namespace PicoU8g2
