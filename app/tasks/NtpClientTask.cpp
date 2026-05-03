@@ -17,11 +17,11 @@ namespace RTRTClock::Tasks {
 
 namespace {
 
-inline constexpr uint16_t NTP_PORT = 123;
-inline constexpr uint32_t NTP_CONNECTION_TIMEOUT_MS = 5000;
-inline constexpr size_t NTP_MESSAGE_LENGTH = 48;
+constexpr uint16_t NTP_PORT = 123;
+constexpr uint32_t NTP_CONNECTION_TIMEOUT_MS = 5000;
+constexpr size_t NTP_MESSAGE_LENGTH = 48;
 
-inline constexpr uint32_t NTP_DELTA = 2'208'988'800;
+constexpr uint32_t NTP_DELTA = 2'208'988'800;
 
 struct __attribute__((packed)) NtpPacket {
     uint8_t li_vn_mode = 0;
@@ -40,7 +40,7 @@ struct __attribute__((packed)) NtpPacket {
     uint32_t tx_ts_sec = 0;
     uint32_t tx_ts_frac = 0;
 };
-static_assert(sizeof(NtpPacket) == 48, "NTP size does not exactly 48 bytes");
+static_assert(sizeof(NtpPacket) == 48, "NTP size is not exactly 48 bytes");
 
 using netconn_ptr =
     std::unique_ptr<netconn, decltype([](netconn *p) { netconn_delete(p); })>;

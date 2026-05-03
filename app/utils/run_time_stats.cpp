@@ -9,8 +9,10 @@ namespace RTRTClock::Utils::RunTimeStats {
 
 namespace {
 
-const size_t STATS_BUFFER_SIZE = 1024;
-StackType_t print_stats_task_stack[configMINIMAL_STACK_SIZE + STATS_BUFFER_SIZE];
+constexpr size_t STATS_BUFFER_SIZE = 1024;
+
+StackType_t
+    print_stats_task_stack[configMINIMAL_STACK_SIZE + STATS_BUFFER_SIZE];
 StaticTask_t print_stats_task_buffer;
 
 void print_stats_task_func(void *params) {
@@ -28,8 +30,10 @@ void print_stats_task_func(void *params) {
 } // namespace
 
 void print_stats_task_create() {
-    xTaskCreateStatic(print_stats_task_func, "Print Stats", configMINIMAL_STACK_SIZE + STATS_BUFFER_SIZE, NULL,
-                      tskIDLE_PRIORITY + 1UL, print_stats_task_stack, &print_stats_task_buffer);
+    xTaskCreateStatic(print_stats_task_func, "Print Stats",
+                      configMINIMAL_STACK_SIZE + STATS_BUFFER_SIZE, NULL,
+                      tskIDLE_PRIORITY + 1UL, print_stats_task_stack,
+                      &print_stats_task_buffer);
 }
 
 } // namespace RTRTClock::Utils::RunTimeStats

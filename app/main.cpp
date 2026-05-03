@@ -15,10 +15,10 @@ using namespace RTRTClock;
 
 namespace {
 
-inline constexpr std::string NTP_SERVER = "pool.ntp.org";
-inline constexpr uint32_t NTP_UPDATE_INTVERVAL = 60 * 60 * 1000;
+constexpr std::string NTP_SERVER = "pool.ntp.org";
+constexpr uint32_t NTP_UPDATE_INTVERVAL = 60 * 60 * 1000;
 
-inline constexpr Tasks::DisplayTask::Config DISPLAY_CONFIG = {
+constexpr Tasks::DisplayTask::Config DISPLAY_CONFIG = {
     .i2c_block = i2c1,
     .i2c_address = 0x3C,
     .i2c_baudrate_hz = 1'000'000,
