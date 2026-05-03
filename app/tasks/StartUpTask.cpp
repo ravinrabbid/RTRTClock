@@ -1,5 +1,7 @@
 #include "StartUpTask.h"
 
+#include "RTRTClockConfig.h"
+
 #include "pico/cyw43_arch.h"
 
 namespace RTRTClock::Tasks {
@@ -11,8 +13,9 @@ void connect_wifi() {
 
     printf("Connecting to Wifi...\n");
     while (true) {
-        if (cyw43_arch_wifi_connect_blocking(WIFI_SSID, WIFI_PASSWORD,
-                                             CYW43_AUTH_WPA2_AES_PSK)) {
+        if (cyw43_arch_wifi_connect_blocking(Config::WIFI_SSID.data(),
+                                             Config::WIFI_PASSWORD.data(),
+                                             Config::WIFI_AUTH_METHOD)) {
             printf("Failed to connect, retrying...\n");
         } else {
             printf("Wifi connected.\n");

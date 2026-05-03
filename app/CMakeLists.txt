@@ -2,10 +2,16 @@ set(APP_NAME "${PROJECT_NAME}")
 
 option(USE_DEBUG_PRINT_RUNTIMESTATS "Print task run-time statistics on serial" OFF)
 
-set(WIFI_SSID "${WIFI_SSID}" CACHE INTERNAL "WiFi SSID")
-set(WIFI_PASSWORD "${WIFI_PASSWORD}" CACHE INTERNAL "WiFi password")
+set(CONFIG_WIFI_SSID "${CONFIG_WIFI_SSID}" CACHE INTERNAL "WiFi SSID")
+set(CONFIG_WIFI_PASSWORD "${CONFIG_WIFI_PASSWORD}" CACHE INTERNAL "WiFi password")
 
 include("${CMAKE_SOURCE_DIR}/cmake/FreeRTOS_Kernel_import.cmake")
+
+configure_file(
+    "${CMAKE_SOURCE_DIR}/config/RTRTClockConfig.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/config/RTRTClockConfig.h"
+    @ONLY
+    )
 
 set(${APP_NAME}_SOURCES
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:utils/run_time_stats.cpp>
@@ -23,6 +29,7 @@ add_executable(${APP_NAME}
 
 target_include_directories(${APP_NAME} PRIVATE
     "${CMAKE_SOURCE_DIR}/config"
+    "${CMAKE_CURRENT_BINARY_DIR}/config"
     "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
@@ -47,9 +54,8 @@ set_target_properties(${APP_NAME} PROPERTIES
 
 
 target_compile_definitions(${APP_NAME} PRIVATE
-    WIFI_SSID=\"${WIFI_SSID}\"
-    WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
-    U8G2_WITHOUT_INTERSECTION=1
+    CONFIG_WIFI_SSID=\"${CONFIG_WIFI_SSID}\"
+    CONFIG_WIFI_PASSWORD=\"${CONFIG_WIFI_PASSWORD}\"
     $<$<BOOL:${USE_DEBUG_PRINT_RUNTIMESTATS}>:DEBUG_PRINT_RUNTIMESTATS=1>
 )
 
