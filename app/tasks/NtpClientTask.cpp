@@ -6,11 +6,11 @@
 #include "lwip/netdb.h"
 
 #include "hardware/rtc.h"
-#include "pico/util/datetime.h"
 
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <memory>
 
 namespace RTRTClock::Tasks {
@@ -150,9 +150,7 @@ void NtpClientTask::taskFunc() {
         const uint32_t ntp_seconds = ntohl(response.tx_ts_sec);
         auto unix_time = static_cast<time_t>(ntp_seconds - NTP_DELTA);
 
-        datetime_t datetime;
-        time_to_datetime(unix_time, &datetime);
-        m_rtc_update_signal->signal(datetime);
+        m_rtc_update_signal->signal(unix_time);
 
         xTaskDelayUntil(&last_wake_time, period);
     }

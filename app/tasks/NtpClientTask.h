@@ -12,14 +12,14 @@ class NtpClientTask : public StaticTask<configMINIMAL_STACK_SIZE + 256> {
     const std::string m_ntp_server;
     const uint32_t m_update_interval;
 
-    const RtcTask::signal_t::ptr_t m_rtc_update_signal;
+    const RtcTask::time_signal_t::ptr_t m_rtc_update_signal;
 
     virtual void taskFunc() override;
 
   public:
     NtpClientTask(UBaseType_t priority, std::string_view ntp_server,
                   uint32_t update_interval,
-                  RtcTask::signal_t::ptr_t rtc_update_signal)
+                  RtcTask::time_signal_t::ptr_t rtc_update_signal)
         : StaticTask{"NTP Client Task", priority}, m_ntp_server(ntp_server),
           m_update_interval(update_interval),
           m_rtc_update_signal(std::move(rtc_update_signal)) {};

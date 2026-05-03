@@ -3,6 +3,7 @@
 #include "hardware/rtc.h"
 
 #include "pico/time.h"
+#include "pico/util/datetime.h"
 
 namespace RTRTClock::Tasks {
 
@@ -16,7 +17,7 @@ constexpr datetime_t ALARM_ON_MINUTE = {.year = -1,
                                         .min = -1,
                                         .sec = 0};
 
-RtcTask::signal_t::ptr_t minute_signal{nullptr};
+RtcTask::datetime_signal_t::ptr_t minute_signal{nullptr};
 
 void alarm_callback() {
     datetime_t now;
@@ -32,9 +33,14 @@ void alarm_callback() {
 void RtcTask::taskFunc() {
     datetime_t datetime{};
 
+    setenv("TZ", m_tz.data(), 1);
+    tzset();
+
     const auto wait_and_set_time = [&]() {
-        datetime = m_ntp_update_signal->take();
+        auto time = m_ntp_update_signal->take();
         printf("RTC received NTP update.\n");
+
+        time_to_datetime(time, &datetime);
 
         rtc_set_datetime(&datetime);
         sleep_us(64); // Wait for RTC to settle
@@ -53,11 +59,11 @@ void RtcTask::taskFunc() {
     }
 }
 
-RtcTask::signal_t::ptr_t RtcTask::get_ntp_update_signal() const {
+RtcTask::time_signal_t::ptr_t RtcTask::get_ntp_update_signal() const {
     return m_ntp_update_signal;
 }
 
-RtcTask::signal_t::ptr_t RtcTask::get_minute_signal() const {
+RtcTask::datetime_signal_t::ptr_t RtcTask::get_minute_signal() const {
     return m_minute_signal;
 }
 

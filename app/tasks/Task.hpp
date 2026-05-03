@@ -5,6 +5,7 @@
 #include "task.h"
 
 #include <string>
+#include <string_view>
 
 namespace RTRTClock::Tasks {
 
@@ -24,8 +25,8 @@ class Task {
         reinterpret_cast<Task *>(params)->taskFunc();
     };
 
-    Task(std::string name, UBaseType_t priority)
-        : m_name{std::move(name)}, m_priority{priority} {};
+    Task(std::string_view name, UBaseType_t priority)
+        : m_name{name}, m_priority{priority} {};
 
   public:
     virtual ~Task() { remove(); };
@@ -60,8 +61,8 @@ template <size_t STACK_SIZE> class StaticTask : public Task {
     };
 
   protected:
-    StaticTask(std::string name, UBaseType_t priority)
-        : Task{std::move(name), priority} {};
+    StaticTask(std::string_view name, UBaseType_t priority)
+        : Task{name, priority} {};
 };
 
 template <size_t STACK_SIZE> class DynamicTask : public Task {
@@ -78,8 +79,8 @@ template <size_t STACK_SIZE> class DynamicTask : public Task {
     };
 
   protected:
-    DynamicTask(std::string name, UBaseType_t priority)
-        : Task{std::move(name), priority} {};
+    DynamicTask(std::string_view name, UBaseType_t priority)
+        : Task{name, priority} {};
 };
 
 } // namespace RTRTClock::Tasks

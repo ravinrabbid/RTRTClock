@@ -19,7 +19,7 @@ namespace {
 
 Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 3UL, 200};
 Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 3UL, 500};
-Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL};
+Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL, Config::RTC_TZ};
 Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL, Config::NTP_SERVER,
                                      Config::NTP_UPDATE_INTERVAL,
                                      rtc_task.get_ntp_update_signal()};
