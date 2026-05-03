@@ -27,18 +27,22 @@ constexpr Tasks::DisplayTask::Config DISPLAY_CONFIG = {
     .rotation = Tasks::DisplayTask::Config::Rotation::DEG_0,
 };
 
-Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 2UL, 200};
-Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 2UL, 500};
+Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 3UL, 200};
+Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 3UL, 500};
 Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL};
 Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL, NTP_SERVER,
                                      NTP_UPDATE_INTVERVAL,
-                                     rtc_task.get_update_signal()};
-Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 2UL, DISPLAY_CONFIG};
+                                     rtc_task.get_ntp_update_signal()};
+Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 1UL, DISPLAY_CONFIG,
+                                rtc_task.get_minute_signal()};
 
 std::array tasks{
-    std::ref<Tasks::Task>(led_task), std::ref<Tasks::Task>(led_task2),
-    std::ref<Tasks::Task>(rtc_task), std::ref<Tasks::Task>(ntp_client_task),
-    std::ref<Tasks::Task>(display_task)};
+    std::ref<Tasks::Task>(led_task),        //
+    std::ref<Tasks::Task>(led_task2),       //
+    std::ref<Tasks::Task>(rtc_task),        //
+    std::ref<Tasks::Task>(ntp_client_task), //
+    std::ref<Tasks::Task>(display_task)     //
+};
 Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks};
 
 void launch_tasks() {

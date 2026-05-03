@@ -2,36 +2,63 @@
 
 #include "hardware/rtc.h"
 
-#include "pico/util/datetime.h"
+#include "pico/time.h"
 
 namespace RTRTClock::Tasks {
 
-void RtcTask::taskFunc() {
-    const TickType_t period = pdMS_TO_TICKS(1000);
-    TickType_t last_wake_time = xTaskGetTickCount();
+namespace {
 
-    rtc_init();
+constexpr datetime_t ALARM_ON_MINUTE = {.year = -1,
+                                        .month = -1,
+                                        .day = -1,
+                                        .dotw = -1,
+                                        .hour = -1,
+                                        .min = -1,
+                                        .sec = 0};
 
-    auto datetime = m_signal->take();
-    rtc_set_datetime(&datetime);
+RtcTask::signal_t::ptr_t minute_signal{nullptr};
 
-    while (true) {
-        auto datetime = m_signal->try_take();
-        if (datetime) {
-            rtc_set_datetime(&*datetime);
-            printf("\nNTP update\n");
-        }
+void alarm_callback() {
+    datetime_t now;
+    rtc_get_datetime(&now);
 
-        datetime_t t{};
-        char datetime_str[256];
-        rtc_get_datetime(&t);
-        datetime_to_str(datetime_str, sizeof(datetime_str), &t);
-        printf("\r%s      ", datetime_str);
-
-        xTaskDelayUntil(&last_wake_time, period);
+    if (minute_signal) {
+        minute_signal->signal_from_isr(now);
     }
 }
 
-RtcTask::signal_t::ptr_t RtcTask::get_update_signal() { return m_signal; }
+} // namespace
+
+void RtcTask::taskFunc() {
+    datetime_t datetime{};
+
+    const auto wait_and_set_time = [&]() {
+        datetime = m_ntp_update_signal->take();
+        printf("RTC received NTP update.\n");
+
+        rtc_set_datetime(&datetime);
+        sleep_us(64); // Wait for RTC to settle
+    };
+
+    rtc_init();
+
+    wait_and_set_time();
+    m_minute_signal->signal(datetime);
+
+    minute_signal = m_minute_signal;
+
+    while (true) {
+        rtc_set_alarm(&ALARM_ON_MINUTE, alarm_callback);
+        wait_and_set_time();
+    }
+}
+
+RtcTask::signal_t::ptr_t RtcTask::get_ntp_update_signal() const {
+    return m_ntp_update_signal;
+}
+
+RtcTask::signal_t::ptr_t RtcTask::get_minute_signal() const {
+    return m_minute_signal;
+}
 
 } // namespace RTRTClock::Tasks

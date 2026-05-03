@@ -3,7 +3,9 @@
 
 #include "Task.hpp"
 
-#include "pico_u8g2/I2cHal.h"
+#include "RtcTask.h"
+
+#include "pico_u8g2/I2cHal.hpp"
 
 namespace RTRTClock::Tasks {
 
@@ -16,10 +18,14 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
 
     PicoU8g2::I2cHal m_display;
 
+    const RtcTask::signal_t::ptr_t m_minute_signal;
+
   public:
-    DisplayTask(UBaseType_t priority, const Config &config)
+    DisplayTask(UBaseType_t priority, const Config &config,
+                RtcTask::signal_t::ptr_t minute_signal)
         : StaticTask{"Display Task", priority},
-          m_display{config, u8g2_Setup_ssd1306_i2c_128x64_noname_f} {};
+          m_display{config, u8g2_Setup_ssd1306_i2c_128x64_noname_f},
+          m_minute_signal(std::move(minute_signal)) {};
 };
 
 } // namespace RTRTClock::Tasks
