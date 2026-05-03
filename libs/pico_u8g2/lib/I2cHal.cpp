@@ -1,4 +1,4 @@
-#include "I2cHal.h"
+#include "I2cHal.hpp"
 
 #include "hardware/gpio.h"
 

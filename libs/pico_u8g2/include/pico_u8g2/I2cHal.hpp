@@ -8,6 +8,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <utility>
 
 namespace PicoU8g2 {
 
@@ -57,7 +58,14 @@ class I2cHal {
     I2cHal(I2cHal &&) = delete;
     I2cHal &operator=(I2cHal &&) = delete;
 
-    u8g2_t *getU8g2() { return &m_u8g2; };
+    uint16_t displayWidth() { return u8g2_GetDisplayWidth(&m_u8g2); };
+    uint16_t displayHeight() { return u8g2_GetDisplayHeight(&m_u8g2); };
+
+    template <typename Ret, typename... FnArgs, typename... Args>
+        requires(std::convertible_to<Args, FnArgs> && ...)
+    Ret with_u8g2(Ret (*fn)(u8g2_t *u8g2, FnArgs...), Args &&...args) {
+        return fn(&m_u8g2, std::forward<Args>(args)...);
+    }
 };
 
 } // namespace PicoU8g2
