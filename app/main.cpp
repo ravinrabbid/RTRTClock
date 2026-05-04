@@ -22,9 +22,9 @@ Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 3UL, 500};
 Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL, Config::RTC_TZ};
 Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL, Config::NTP_SERVER,
                                      Config::NTP_UPDATE_INTERVAL,
-                                     rtc_task.get_ntp_update_signal()};
+                                     rtc_task.getNtpUpdateSignal()};
 Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 1UL, Config::DISPLAY_CONFIG,
-                                rtc_task.get_minute_signal()};
+                                rtc_task.getMinuteSignal()};
 
 std::array tasks{
     std::ref<Tasks::Task>(led_task),        //
@@ -33,7 +33,8 @@ std::array tasks{
     std::ref<Tasks::Task>(ntp_client_task), //
     std::ref<Tasks::Task>(display_task)     //
 };
-Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks};
+Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks,
+                                display_task.getMessageSignal()};
 
 void launch_tasks() {
     printf("Launching tasks\n");

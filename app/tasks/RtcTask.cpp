@@ -17,7 +17,7 @@ constexpr datetime_t ALARM_ON_MINUTE = {.year = -1,
                                         .min = -1,
                                         .sec = 0};
 
-RtcTask::datetime_signal_t::ptr_t minute_signal{nullptr};
+RtcTask::DatetimeSignal_t::ptr_t minute_signal{nullptr};
 
 void alarm_callback() {
     datetime_t now;
@@ -59,11 +59,11 @@ void RtcTask::taskFunc() {
     }
 }
 
-RtcTask::time_signal_t::ptr_t RtcTask::get_ntp_update_signal() const {
+RtcTask::TimeSignal_t::ptr_t RtcTask::getNtpUpdateSignal() const {
     return m_ntp_update_signal;
 }
 
-RtcTask::datetime_signal_t::ptr_t RtcTask::get_minute_signal() const {
+RtcTask::DatetimeSignal_t::ptr_t RtcTask::getMinuteSignal() const {
     return m_minute_signal;
 }
 

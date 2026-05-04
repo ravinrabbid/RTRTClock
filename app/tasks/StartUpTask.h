@@ -1,6 +1,7 @@
 #ifndef TASKS_STARTUPTASK_H_
 #define TASKS_STARTUPTASK_H_
 
+#include "DisplayTask.h"
 #include "Task.hpp"
 
 #include <functional>
@@ -14,10 +15,16 @@ class StartUpTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
 
     virtual void taskFunc() override;
 
+    void connectWifi();
+
+    DisplayTask::MessageSignal_t::ptr_t m_message_signal;
+
   public:
     StartUpTask(UBaseType_t priority,
-                std::span<std::reference_wrapper<Task>> tasks)
-        : StaticTask{"Start Up Task", priority}, m_tasks{tasks} {};
+                std::span<std::reference_wrapper<Task>> tasks,
+                DisplayTask::MessageSignal_t::ptr_t msg_sig)
+        : StaticTask{"Start Up Task", priority}, m_tasks{tasks},
+          m_message_signal{std::move(msg_sig)} {};
 };
 
 } // namespace RTRTClock::Tasks

@@ -1,5 +1,7 @@
 #include "DisplayTask.h"
 
+#include <variant>
+
 namespace RTRTClock::Tasks {
 
 namespace {
@@ -45,18 +47,54 @@ void print_date(PicoU8g2::I2cHal &display, const datetime_t &dt) {
     display.with_u8g2(u8g2_DrawStr, 0, display.displayHeight(), date_str);
 }
 
+constexpr std::string_view to_string(DisplayTask::Message message) {
+    switch (message) {
+    case DisplayTask::Message::WIFI_CONNECTING:
+        return "Connecting...";
+    case DisplayTask::Message::WIFI_CONNECTED:
+        return "Connected.";
+    case DisplayTask::Message::WIFI_RETRYING:
+        return "Retrying...";
+    }
+    return "Unknown";
+}
+
+void print_message(PicoU8g2::I2cHal &display, DisplayTask::Message message) {
+    display.with_u8g2(u8g2_SetFont, u8g2_font_pxplusibmvga8_mr);
+    display.with_u8g2(u8g2_SetFontPosBottom);
+
+    display.with_u8g2(u8g2_DrawStr, 0, display.displayHeight(),
+                      to_string(message).data());
+}
+
 } // namespace
 
 void DisplayTask::taskFunc() {
     while (true) {
-        const auto dt = m_minute_signal->take();
+        const auto message = m_signals.take();
 
         m_display.with_u8g2(u8g2_ClearBuffer);
 
-        print_time(m_display, dt);
-        print_date(m_display, dt);
+        std::visit(
+            [&](auto &&msg) {
+                using T = std::decay_t<decltype(msg)>;
+                if constexpr (std::is_same_v<T, datetime_t>) {
+                    print_time(m_display, msg);
+                    print_date(m_display, msg);
+                } else if constexpr (std::is_same_v<T, Message>) {
+                    print_message(m_display, msg);
+                } else {
+                    static_assert(false, "non-exhaustive visitor!");
+                }
+            },
+            message);
 
         m_display.with_u8g2(u8g2_SendBuffer);
     }
 }
+
+DisplayTask::MessageSignal_t::ptr_t DisplayTask::getMessageSignal() const {
+    return m_message_signal;
+}
+
 } // namespace RTRTClock::Tasks
