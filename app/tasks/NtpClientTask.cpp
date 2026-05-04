@@ -148,7 +148,14 @@ void NtpClientTask::taskFunc() {
         }
 
         const uint32_t ntp_seconds = ntohl(response.tx_ts_sec);
+        const uint32_t ntp_fractions = ntohl(response.tx_ts_frac);
+
         auto unix_time = static_cast<time_t>(ntp_seconds - NTP_DELTA);
+
+        // Wait for the next full second to sync
+        const uint32_t ms_to_next_sec =
+            1000 - ((uint64_t)ntp_fractions * 1000 >> 32);
+        vTaskDelay(pdMS_TO_TICKS(ms_to_next_sec));
 
         m_rtc_update_signal->signal(unix_time);
 
