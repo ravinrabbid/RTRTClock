@@ -5,7 +5,7 @@
 
 #include "utils/Signal.hpp"
 
-#include <time.h>
+#include <ctime>
 
 namespace RTRTClock::Tasks {
 

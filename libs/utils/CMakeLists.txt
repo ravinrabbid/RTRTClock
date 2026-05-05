@@ -1,7 +1,7 @@
-set(LIB_NAME "pico_u8g2")
+set(LIB_NAME "utils")
 
 set(${LIB_NAME}_SOURCES
-    lib/I2cHal.cpp
+    lib/run_time_stats.cpp
     )
 
 add_library(${LIB_NAME}
@@ -9,6 +9,8 @@ add_library(${LIB_NAME}
     )
 
 target_include_directories(${LIB_NAME} 
+    PRIVATE
+        ${CMAKE_BINARY_DIR}/config
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -16,10 +18,9 @@ target_include_directories(${LIB_NAME}
 
 target_link_libraries(${LIB_NAME}
     PRIVATE
-        pico_stdlib
+        $<$<BOOL:${CONFIG_DEBUG_PRINT_RUNTIME_STATS}>:hardware_timer>
     PUBLIC
-        hardware_i2c
-        u8g2
+        FreeRTOS-Kernel-Static
     )
 
 set_target_properties(${LIB_NAME} PROPERTIES

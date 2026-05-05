@@ -1,11 +1,9 @@
-#include "NtpClientTask.h"
+#include "tasks/NtpClientTask.h"
 
 #include "lwip/api.h"
 #include "lwip/dns.h"
 #include "lwip/ip_addr.h"
 #include "lwip/netdb.h"
-
-#include "hardware/rtc.h"
 
 #include <cstdarg>
 #include <cstdio>
@@ -53,18 +51,18 @@ void NtpClientTask::taskFunc() {
     const TickType_t period = pdMS_TO_TICKS(m_update_interval);
     TickType_t last_wake_time = xTaskGetTickCount();
 
-    const auto print_and_delay = [](const char *fmt, ...) {
+    const auto print_and_delay = [](const char *fmt, ...) { // NOLINT
         va_list args;
-        va_start(args, fmt);
-        vprintf(fmt, args);
-        va_end(args);
+        va_start(args, fmt); // NOLINT
+        vprintf(fmt, args);  // NOLINT
+        va_end(args);        // NOLINT
 
         vTaskDelay(pdMS_TO_TICKS(5000)); // Limit retry rate
     };
 
     NtpPacket request{};
     // LI = 0 (no warning), VN = 4 (NTPv4), Mode = 3 (client)
-    request.li_vn_mode = (0u << 6) | (4u << 3) | 3u;
+    request.li_vn_mode = (0 << 6) | (4 << 3) | 3;
 
     while (true) {
         // Resolve hostname
@@ -118,7 +116,8 @@ void NtpClientTask::taskFunc() {
             if (receive_err == ERR_TIMEOUT) {
                 print_and_delay("Receive timed out: %d\n", receive_err);
                 continue;
-            } else if (receive_err != ERR_OK || receive_buffer_raw == nullptr) {
+            }
+            if (receive_err != ERR_OK || receive_buffer_raw == nullptr) {
                 print_and_delay("Receive failed: %d\n", receive_err);
                 continue;
             }
@@ -154,7 +153,7 @@ void NtpClientTask::taskFunc() {
 
         // Wait for the next full second to sync
         const uint32_t ms_to_next_sec =
-            1000 - ((uint64_t)ntp_fractions * 1000 >> 32);
+            1000 - (static_cast<uint64_t>(ntp_fractions) * 1000 >> 32);
         vTaskDelay(pdMS_TO_TICKS(ms_to_next_sec));
 
         m_rtc_update_signal->signal(unix_time);

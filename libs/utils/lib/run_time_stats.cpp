@@ -1,4 +1,7 @@
 #include "FreeRTOS.h"
+
+#ifdef CONFIG_DEBUG_PRINT_RUNTIME_STATS
+
 #include "task.h"
 
 #include "hardware/timer.h"
@@ -30,6 +33,7 @@ void print_stats_task_func(void *params) {
 } // namespace
 
 void print_stats_task_create() {
+
     xTaskCreateStatic(print_stats_task_func, "Print Stats",
                       configMINIMAL_STACK_SIZE + STATS_BUFFER_SIZE, NULL,
                       tskIDLE_PRIORITY + 1UL, print_stats_task_stack,
@@ -39,3 +43,13 @@ void print_stats_task_create() {
 } // namespace RTRTClock::Utils::RunTimeStats
 
 uint32_t get_run_time_counter_value() { return time_us_32(); }
+
+#else // CONFIG_DEBUG_PRINT_RUNTIME_STATS
+
+namespace RTRTClock::Utils::RunTimeStats {
+
+void print_stats_task_create() {}
+
+} // namespace RTRTClock::Utils::RunTimeStats
+
+#endif // CONFIG_DEBUG_PRINT_RUNTIME_STATS

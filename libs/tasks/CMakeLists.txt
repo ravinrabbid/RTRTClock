@@ -1,7 +1,11 @@
-set(LIB_NAME "pico_u8g2")
+set(LIB_NAME "tasks")
 
 set(${LIB_NAME}_SOURCES
-    lib/I2cHal.cpp
+    lib/DisplayTask.cpp
+    lib/LedBlinkTask.cpp
+    lib/NtpClientTask.cpp
+    lib/RtcTask.cpp
+    lib/StartUpTask.cpp
     )
 
 add_library(${LIB_NAME}
@@ -9,6 +13,9 @@ add_library(${LIB_NAME}
     )
 
 target_include_directories(${LIB_NAME} 
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/config
+        ${CMAKE_BINARY_DIR}/config
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -16,10 +23,15 @@ target_include_directories(${LIB_NAME}
 
 target_link_libraries(${LIB_NAME}
     PRIVATE
-        pico_stdlib
+        hardware_rtc
+        pico_cyw43_arch_lwip_sys_freertos
+        pico_time
+        pico_util
     PUBLIC
-        hardware_i2c
-        u8g2
+        FreeRTOS-Kernel-Static
+        FreeRTOS-Kernel-Heap4
+        utils
+        pico_u8g2
     )
 
 set_target_properties(${LIB_NAME} PROPERTIES
@@ -28,7 +40,7 @@ set_target_properties(${LIB_NAME} PROPERTIES
     C_EXTENSIONS NO
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
+    CXX_EXTENSIONS YES
     CXX_SCAN_FOR_MODULES NO
 )
 

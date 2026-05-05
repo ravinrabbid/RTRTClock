@@ -6,25 +6,44 @@
 
 #include <functional>
 #include <span>
+#include <string>
 
 namespace RTRTClock::Tasks {
 
 class StartUpTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
+  public:
+    struct WifiConfig {
+        enum class Auth {
+            OPEN,
+            WPA_TKIP_PSK,
+            WPA2_AES_PSK,
+            WPA2_MIXED_PSK,
+            WPA3_SAE_AES_PSK,
+            WPA3_WPA2_AES_PSK,
+        };
+
+        std::string ssid;
+        std::string password;
+        Auth auth_method;
+    };
+
   private:
     const std::span<const std::reference_wrapper<Task>> m_tasks;
+    const WifiConfig m_wifi_config;
+
+    DisplayTask::MessageSignal_t::ptr_t m_message_signal;
 
     virtual void taskFunc() override;
 
     void connectWifi();
 
-    DisplayTask::MessageSignal_t::ptr_t m_message_signal;
-
   public:
     StartUpTask(UBaseType_t priority,
                 std::span<std::reference_wrapper<Task>> tasks,
+                const WifiConfig &wifi_config,
                 DisplayTask::MessageSignal_t::ptr_t msg_sig)
         : StaticTask{"Start Up Task", priority}, m_tasks{tasks},
-          m_message_signal{std::move(msg_sig)} {};
+          m_wifi_config{wifi_config}, m_message_signal{std::move(msg_sig)} {};
 };
 
 } // namespace RTRTClock::Tasks

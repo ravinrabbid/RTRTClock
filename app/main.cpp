@@ -2,16 +2,11 @@
 #include "tasks/LedBlinkTask.h"
 #include "tasks/NtpClientTask.h"
 #include "tasks/StartUpTask.h"
+#include "utils/run_time_stats.h"
 
 #include "RTRTClockConfig.h"
 
 #include "pico/stdlib.h"
-
-#include <cstdio>
-
-#if (DEBUG_PRINT_RUNTIMESTATS == 1)
-#include "utils/run_time_stats.h"
-#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 
 using namespace RTRTClock;
 
@@ -33,17 +28,20 @@ std::array tasks{
     std::ref<Tasks::Task>(ntp_client_task), //
     std::ref<Tasks::Task>(display_task)     //
 };
-Tasks::StartUpTask startup_task{tskIDLE_PRIORITY + 1UL, tasks,
-                                display_task.getMessageSignal()};
+Tasks::StartUpTask startup_task{
+    tskIDLE_PRIORITY + 1UL, tasks,
+    Tasks::StartUpTask::WifiConfig{.ssid = std::string{Config::WIFI_SSID},
+                                   .password =
+                                       std::string{Config::WIFI_PASSWORD},
+                                   .auth_method = Config::WIFI_AUTH},
+    display_task.getMessageSignal()};
 
 void launch_tasks() {
     printf("Launching tasks\n");
 
     startup_task.create();
 
-#if (DEBUG_PRINT_RUNTIMESTATS == 1)
     Utils::RunTimeStats::print_stats_task_create();
-#endif // ( DEBUG_PRINT_RUNTIMESTATS == 1 )
 
     vTaskStartScheduler();
 
