@@ -32,7 +32,10 @@ set_target_properties(${LIB_NAME} PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
+    CXX_SCAN_FOR_MODULES NO
 )
+
+enable_clang_tidy(${LIB_NAME})
 
 # Set COMPILE_OPTIONS on source files directly
 # to avoid errors pulled in from pico-sdk/FreeRTOS sources

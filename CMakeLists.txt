@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20...4.2)
+cmake_minimum_required(VERSION 3.27...4.2)
 
 if((NOT DEFINED ENV{PICO_SDK_PATH}) AND (NOT PICO_SDK_PATH))
     set(PICO_SDK_FETCH_FROM_GIT_TAG "2.2.0")
@@ -17,6 +17,7 @@ if((NOT DEFINED ENV{U8G2_PATH}) AND (NOT U8G2_PATH))
     set(U8G2_PATH "${CMAKE_SOURCE_DIR}/extern/u8g2")
 endif()
 
+include(cmake/clang-tidy.cmake)
 include(cmake/pico_sdk_import.cmake)
 
 project(RTRTClock VERSION 0.1.0

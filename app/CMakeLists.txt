@@ -50,6 +50,7 @@ set_target_properties(${APP_NAME} PROPERTIES
     CXX_STANDARD 20
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS YES
+    CXX_SCAN_FOR_MODULES NO
 )
 
 
@@ -65,6 +66,8 @@ target_compile_definitions(${APP_NAME} PRIVATE
 set_source_files_properties(${${APP_NAME}_SOURCES} PROPERTIES
     COMPILE_OPTIONS "-Wall;-Wextra;-Werror"
 )
+
+enable_clang_tidy(${APP_NAME})
 
 pico_set_program_name(${APP_NAME} "${PROJECT_NAME}")
 pico_set_program_version(${APP_NAME} "${PROJECT_VERSION}")
