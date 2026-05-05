@@ -4,6 +4,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include <array>
 #include <string>
 #include <string_view>
 
@@ -11,6 +12,9 @@ namespace RTRTClock::Tasks {
 
 class Task {
   private:
+    const std::string m_name;
+    const UBaseType_t m_priority;
+
     TaskHandle_t m_handle{nullptr};
 
     virtual void taskFunc() = 0;
@@ -18,9 +22,6 @@ class Task {
     virtual TaskHandle_t internalCreate() = 0;
 
   protected:
-    const std::string m_name;
-    const UBaseType_t m_priority;
-
     static void runTaskFunc(void *params) {
         reinterpret_cast<Task *>(params)->taskFunc();
     };
@@ -35,6 +36,9 @@ class Task {
     Task(Task &&) = delete;
     Task &operator=(const Task &) = delete;
     Task &operator=(Task &&) = delete;
+
+    [[nodiscard]] std::string getName() const { return m_name; };
+    [[nodiscard]] UBaseType_t getPriority() const { return m_priority; };
 
     virtual void create() {
         if (m_handle == nullptr) {
@@ -52,12 +56,13 @@ class Task {
 
 template <size_t STACK_SIZE> class StaticTask : public Task {
   private:
-    StackType_t m_stack[STACK_SIZE];
-    StaticTask_t m_buffer;
+    std::array<StackType_t, STACK_SIZE> m_stack;
+    StaticTask_t m_buffer{};
 
-    virtual TaskHandle_t internalCreate() final {
-        return xTaskCreateStatic(runTaskFunc, m_name.c_str(), STACK_SIZE,
-                                 (void *)this, m_priority, m_stack, &m_buffer);
+    TaskHandle_t internalCreate() final {
+        return xTaskCreateStatic(runTaskFunc, getName().c_str(), STACK_SIZE,
+                                 static_cast<void *>(this), getPriority(),
+                                 m_stack.data(), &m_buffer);
     };
 
   protected:
@@ -67,11 +72,12 @@ template <size_t STACK_SIZE> class StaticTask : public Task {
 
 template <size_t STACK_SIZE> class DynamicTask : public Task {
   private:
-    virtual TaskHandle_t internalCreate() final {
+    TaskHandle_t internalCreate() final {
         TaskHandle_t handle{nullptr};
 
-        if (xTaskCreate(runTaskFunc, m_name.c_str(), STACK_SIZE, (void *)this,
-                        m_priority, &handle) == pdPASS) {
+        if (xTaskCreate(runTaskFunc, getName().c_str(), STACK_SIZE,
+                        static_cast<void *>(this), getPriority(),
+                        &handle) == pdPASS) {
             return handle;
         };
 

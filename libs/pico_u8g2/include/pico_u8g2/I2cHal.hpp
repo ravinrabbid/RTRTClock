@@ -66,17 +66,18 @@ class I2cHal {
         return u8g2_GetDisplayHeight(&m_u8g2);
     };
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast): External define
     void powerOn() { u8g2_SetPowerSave(&m_u8g2, false); };
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast): External define
     void powerOff() { u8g2_SetPowerSave(&m_u8g2, true); };
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast): External define
     void setContrast(uint8_t contrast) { u8g2_SetContrast(&m_u8g2, contrast); };
 
     template <typename Ret, typename... FnArgs, typename... Args>
         requires(std::convertible_to<Args, FnArgs> && ...)
     Ret with_u8g2(Ret (*fn)(u8g2_t *u8g2, FnArgs...), Args &&...args) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
         return fn(&m_u8g2, std::forward<Args>(args)...);
     }
 };

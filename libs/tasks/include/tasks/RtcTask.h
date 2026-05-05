@@ -20,7 +20,7 @@ class RtcTask : public StaticTask<configMINIMAL_STACK_SIZE + 64> {
 
     const std::string m_tz;
 
-    virtual void taskFunc() override;
+    void taskFunc() override;
 
   public:
     RtcTask(UBaseType_t priority, std::string_view tz)
@@ -28,8 +28,8 @@ class RtcTask : public StaticTask<configMINIMAL_STACK_SIZE + 64> {
           m_ntp_update_signal{std::make_shared<TimeSignal_t>()},
           m_minute_signal{std::make_shared<DatetimeSignal_t>()}, m_tz{tz} {};
 
-    TimeSignal_t::ptr_t getNtpUpdateSignal() const;
-    DatetimeSignal_t::ptr_t getMinuteSignal() const;
+    [[nodiscard]] TimeSignal_t::ptr_t getNtpUpdateSignal() const;
+    [[nodiscard]] DatetimeSignal_t::ptr_t getMinuteSignal() const;
 };
 
 } // namespace RTRTClock::Tasks

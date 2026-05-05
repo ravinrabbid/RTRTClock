@@ -24,7 +24,7 @@ template <typename T> class Signal {
     QueueHandle_t m_queue_handle{nullptr};
 
     std::array<uint8_t, sizeof(T)> m_queue_storage;
-    StaticQueue_t m_queue_buffer;
+    StaticQueue_t m_queue_buffer{};
 
   public:
     Signal() {
@@ -51,7 +51,7 @@ template <typename T> class Signal {
     };
 
     std::optional<T> try_take() {
-        T value;
+        T value{};
         if (xQueueReceive(m_queue_handle, &value, 0) != pdPASS) {
             return std::nullopt;
         }
@@ -80,7 +80,7 @@ template <typename... Ts> class SignalSet {
     QueueSetHandle_t m_queue_set_handle{nullptr};
 
     std::array<uint8_t, MAX_ELEMENT_SIZE> m_queue_set_storage;
-    StaticQueue_t m_queue_set_buffer;
+    StaticQueue_t m_queue_set_buffer{};
 
   public:
     SignalSet(std::shared_ptr<Signal<Ts>>... signals)
@@ -105,7 +105,7 @@ template <typename... Ts> class SignalSet {
 
     std::variant<Ts...> take() {
         while (true) {
-            const auto activated_handle =
+            auto *const activated_handle =
                 xQueueSelectFromSet(m_queue_set_handle, portMAX_DELAY);
 
             std::optional<std::variant<Ts...>> result =

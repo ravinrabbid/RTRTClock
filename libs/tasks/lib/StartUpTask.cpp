@@ -4,7 +4,9 @@
 
 namespace RTRTClock::Tasks {
 
-static uint32_t to_cyw43_auth(StartUpTask::WifiConfig::Auth auth) {
+namespace {
+
+uint32_t to_cyw43_auth(StartUpTask::WifiConfig::Auth auth) {
     switch (auth) {
     case StartUpTask::WifiConfig::Auth::OPEN:
         return CYW43_AUTH_OPEN;
@@ -22,6 +24,8 @@ static uint32_t to_cyw43_auth(StartUpTask::WifiConfig::Auth auth) {
 
     return 0;
 }
+
+} // namespace
 
 void StartUpTask::connectWifi() {
     cyw43_arch_enable_sta_mode();

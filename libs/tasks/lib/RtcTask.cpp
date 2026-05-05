@@ -17,6 +17,7 @@ constexpr datetime_t ALARM_ON_MINUTE = {.year = -1,
                                         .min = -1,
                                         .sec = 0};
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 RtcTask::DatetimeSignal_t::ptr_t minute_signal{nullptr};
 
 void alarm_callback() {
@@ -36,6 +37,10 @@ void RtcTask::taskFunc() {
     setenv("TZ", m_tz.data(), 1);
     tzset();
 
+    rtc_init();
+
+    minute_signal = m_minute_signal;
+
     const auto wait_and_set_time = [&]() {
         auto time = m_ntp_update_signal->take();
         printf("RTC received NTP update.\n");
@@ -46,12 +51,8 @@ void RtcTask::taskFunc() {
         sleep_us(64); // Wait for RTC to settle
     };
 
-    rtc_init();
-
     wait_and_set_time();
     m_minute_signal->signal(datetime);
-
-    minute_signal = m_minute_signal;
 
     while (true) {
         rtc_set_alarm(&ALARM_ON_MINUTE, alarm_callback);

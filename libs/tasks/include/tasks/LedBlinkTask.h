@@ -9,7 +9,7 @@ class LedBlinkTask : public StaticTask<configMINIMAL_STACK_SIZE> {
   private:
     uint m_frequency;
 
-    virtual void taskFunc() override;
+    void taskFunc() override;
 
   public:
     LedBlinkTask(UBaseType_t priority, uint frequency)

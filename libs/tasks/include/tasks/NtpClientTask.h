@@ -14,7 +14,7 @@ class NtpClientTask : public StaticTask<configMINIMAL_STACK_SIZE + 256> {
 
     const RtcTask::TimeSignal_t::ptr_t m_rtc_update_signal;
 
-    virtual void taskFunc() override;
+    void taskFunc() override;
 
   public:
     NtpClientTask(UBaseType_t priority, std::string_view ntp_server,

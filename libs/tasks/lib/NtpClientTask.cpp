@@ -38,7 +38,8 @@ struct __attribute__((packed)) NtpPacket {
     uint32_t tx_ts_sec = 0;
     uint32_t tx_ts_frac = 0;
 };
-static_assert(sizeof(NtpPacket) == 48, "NTP size is not exactly 48 bytes");
+static_assert(sizeof(NtpPacket) == NTP_MESSAGE_LENGTH,
+              "NTP size is not exactly 48 bytes");
 
 using netconn_ptr =
     std::unique_ptr<netconn, decltype([](netconn *p) { netconn_delete(p); })>;

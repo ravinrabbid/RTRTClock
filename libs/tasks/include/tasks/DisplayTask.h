@@ -11,7 +11,7 @@ namespace RTRTClock::Tasks {
 
 class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
   public:
-    enum class Message {
+    enum class Message : uint8_t {
         WIFI_CONNECTING,
         WIFI_CONNECTED,
         WIFI_RETRYING,
@@ -23,7 +23,7 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
   private:
     using SignalSet_t = Utils::SignalSet<datetime_t, Message>;
 
-    virtual void taskFunc() override;
+    void taskFunc() override;
 
     PicoU8g2::I2cHal m_display;
 
@@ -38,7 +38,7 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
           m_message_signal(std::make_shared<MessageSignal_t>()),
           m_signals(std::move(minute_signal), m_message_signal) {};
 
-    MessageSignal_t::ptr_t getMessageSignal() const;
+    [[nodiscard]] MessageSignal_t::ptr_t getMessageSignal() const;
 };
 
 } // namespace RTRTClock::Tasks
