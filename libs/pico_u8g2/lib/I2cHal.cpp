@@ -2,7 +2,8 @@
 
 #include "hardware/gpio.h"
 
-#include <cstring>
+#include <algorithm>
+#include <span>
 
 namespace PicoU8g2 {
 
@@ -11,7 +12,7 @@ uint8_t I2cHal::byteCallback(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int,
     if (u8x8_GetUserPtr(u8x8) == nullptr) {
         return 0;
     }
-    I2cHal *hal = static_cast<I2cHal *>(u8x8_GetUserPtr(u8x8));
+    auto *hal = static_cast<I2cHal *>(u8x8_GetUserPtr(u8x8));
 
     switch (msg) {
     case U8X8_MSG_BYTE_INIT:
@@ -21,16 +22,19 @@ uint8_t I2cHal::byteCallback(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int,
         hal->m_send_buffer_fill = 0;
         break;
     case U8X8_MSG_BYTE_SEND: {
-        const auto *buffer = static_cast<const uint8_t *>(arg_ptr);
         const auto buffer_length = static_cast<size_t>(arg_int);
-
         const auto send_length =
             buffer_length + hal->m_send_buffer_fill > hal->m_send_buffer.size()
                 ? hal->m_send_buffer.size() - hal->m_send_buffer_fill
                 : buffer_length;
 
-        std::copy(buffer, buffer + send_length,
-                  hal->m_send_buffer.begin() + hal->m_send_buffer_fill);
+        auto buffer =
+            std::span(static_cast<const uint8_t *>(arg_ptr), buffer_length)
+                .subspan(0, send_length);
+        auto send_buffer =
+            std::span(hal->m_send_buffer).subspan(hal->m_send_buffer_fill);
+
+        std::ranges::copy(buffer, send_buffer.begin());
 
         hal->m_send_buffer_fill += send_length;
     } break;
@@ -59,8 +63,6 @@ uint8_t I2cHal::gpioAndDelayCallback(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int,
 
     switch (msg) {
     case U8X8_MSG_GPIO_AND_DELAY_INIT:
-        // NOOP
-        break;
     case U8X8_MSG_DELAY_NANO:
         // NOOP
         break;
@@ -79,7 +81,7 @@ uint8_t I2cHal::gpioAndDelayCallback(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int,
     return 1;
 }
 
-I2cHal::I2cHal(const Config &config, u8g2_setup_fn_t setup_fn)
+I2cHal::I2cHal(const Config &config, const u8g2_setup_fn_t &setup_fn)
     : m_config(config) {
 
     i2c_init(m_config.i2c_block, m_config.i2c_baudrate_hz);
@@ -115,10 +117,14 @@ I2cHal::I2cHal(const Config &config, u8g2_setup_fn_t setup_fn)
     setup_fn(&m_u8g2, rotation_cb, &I2cHal::byteCallback,
              &I2cHal::gpioAndDelayCallback);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     u8g2_SetUserPtr(&m_u8g2, (void *)this);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     u8g2_InitDisplay(&m_u8g2);
     u8g2_ClearDisplay(&m_u8g2);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     u8g2_SetContrast(&m_u8g2, m_config.contrast);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     u8g2_SetPowerSave(&m_u8g2, 0);
 };
 } // namespace PicoU8g2

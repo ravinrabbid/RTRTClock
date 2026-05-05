@@ -1,5 +1,5 @@
-#ifndef PICO_U8G2_I2CHAL_H_
-#define PICO_U8G2_I2CHAL_H_
+#ifndef PICO_U8G2_I2CHAL_HPP
+#define PICO_U8G2_I2CHAL_HPP
 
 #include "u8g2.h"
 
@@ -44,13 +44,13 @@ class I2cHal {
                                         uint8_t arg_int, void *arg_ptr);
 
     Config m_config;
-    u8g2_t m_u8g2;
+    u8g2_t m_u8g2{};
 
     std::array<uint8_t, 32> m_send_buffer{0};
     size_t m_send_buffer_fill{0};
 
   public:
-    I2cHal(const Config &i2c_config, u8g2_setup_fn_t setup_fn);
+    I2cHal(const Config &i2c_config, const u8g2_setup_fn_t &setup_fn);
 
     ~I2cHal() = default;
 
@@ -59,12 +59,19 @@ class I2cHal {
     I2cHal(I2cHal &&) = delete;
     I2cHal &operator=(I2cHal &&) = delete;
 
-    uint16_t displayWidth() const { return u8g2_GetDisplayWidth(&m_u8g2); };
-    uint16_t displayHeight() const { return u8g2_GetDisplayHeight(&m_u8g2); };
+    [[nodiscard]] uint16_t displayWidth() const {
+        return u8g2_GetDisplayWidth(&m_u8g2);
+    };
+    [[nodiscard]] uint16_t displayHeight() const {
+        return u8g2_GetDisplayHeight(&m_u8g2);
+    };
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     void powerOn() { u8g2_SetPowerSave(&m_u8g2, false); };
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     void powerOff() { u8g2_SetPowerSave(&m_u8g2, true); };
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     void setContrast(uint8_t contrast) { u8g2_SetContrast(&m_u8g2, contrast); };
 
     template <typename Ret, typename... FnArgs, typename... Args>
@@ -76,4 +83,4 @@ class I2cHal {
 
 } // namespace PicoU8g2
 
-#endif // PICO_U8G2_I2CHAL_H_
+#endif // PICO_U8G2_I2CHAL_HPP
