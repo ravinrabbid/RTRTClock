@@ -73,13 +73,13 @@ template <typename T> class Signal {
 template <typename... Ts> class SignalSet {
   private:
     static constexpr size_t SIGNAL_COUNT = sizeof...(Ts);
-    static constexpr size_t MAX_ELEMENT_SIZE = std::max({sizeof(Ts)...});
 
     std::tuple<std::shared_ptr<Signal<Ts>>...> m_signals;
 
     QueueSetHandle_t m_queue_set_handle{nullptr};
 
-    std::array<uint8_t, MAX_ELEMENT_SIZE> m_queue_set_storage;
+    std::array<uint8_t, SIGNAL_COUNT * sizeof(QueueHandle_t)>
+        m_queue_set_storage;
     StaticQueue_t m_queue_set_buffer{};
 
   public:
