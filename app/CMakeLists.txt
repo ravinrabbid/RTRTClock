@@ -2,6 +2,7 @@ set(APP_NAME "${PROJECT_NAME}")
 
 set(${APP_NAME}_SOURCES
     main.cpp
+    freertos_heap_alloc.cpp
     )
 
 add_executable(${APP_NAME}
@@ -26,6 +27,10 @@ set_target_properties(${APP_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
     CXX_SCAN_FOR_MODULES NO
+)
+
+target_compile_definitions(${APP_NAME} PRIVATE
+    PICO_CXX_DISABLE_ALLOCATION_OVERRIDES=1
 )
 
 # Set COMPILE_OPTIONS on source files directly

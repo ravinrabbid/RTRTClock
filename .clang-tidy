@@ -9,6 +9,7 @@ Checks: >
   readability-*,
 
   -bugprone-easily-swappable-parameters,
+  -clang-analyzer-core.FixedAddressDereference,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -llvm-prefer-static-over-anonymous-namespace,
