@@ -7,14 +7,18 @@
 
 #include "pico_u8g2/I2cHal.hpp"
 
+#include <optional>
+
 namespace RTRTClock::Tasks {
 
-class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
+class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 256> {
   public:
     enum class Message : uint8_t {
         WIFI_CONNECTING,
         WIFI_CONNECTED,
         WIFI_RETRYING,
+        WAIT_SYNC,
+        NONE,
     };
 
     using Config_t = PicoU8g2::I2cHal::Config;
@@ -26,8 +30,11 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
     void taskFunc() override;
 
     PicoU8g2::I2cHal m_display;
+    std::optional<datetime_t> m_datetime;
+    Message m_message{Message::NONE};
 
     MessageSignal_t::ptr_t m_message_signal;
+
     SignalSet_t m_signals;
 
   public:
@@ -39,6 +46,8 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
           m_signals(std::move(minute_signal), m_message_signal) {};
 
     [[nodiscard]] MessageSignal_t::ptr_t getMessageSignal() const;
+
+    void clearMessage();
 };
 
 } // namespace RTRTClock::Tasks

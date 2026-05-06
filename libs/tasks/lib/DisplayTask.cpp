@@ -1,5 +1,7 @@
 #include "tasks/DisplayTask.h"
 
+#include "timers.h"
+
 #include <array>
 #include <variant>
 
@@ -39,9 +41,11 @@ void print_time(PicoU8g2::I2cHal &display, const datetime_t &dt) {
 void print_date(PicoU8g2::I2cHal &display, const datetime_t &dt) {
     std::array<char, 20> date_str{};
 
+    // NOLINTBEGIN(bugprone-suspicious-stringview-data-usage)
     snprintf(date_str.data(), date_str.size(), "%s %s %02u, %04d",
-             DAYS_STR.at(dt.dotw).data(), MONTHS_STR.at(dt.month - 1).data(), //NOLINT
+             DAYS_STR.at(dt.dotw).data(), MONTHS_STR.at(dt.month - 1).data(),
              dt.day, dt.year);
+    // NOLINTEND(bugprone-suspicious-stringview-data-usage)
 
     display.with_u8g2(u8g2_SetFont, u8g2_font_pxplusibmvga8_mr);
     display.with_u8g2(u8g2_SetFontPosBottom);
@@ -58,6 +62,10 @@ constexpr std::string_view to_string(DisplayTask::Message message) {
         return "Connected.";
     case DisplayTask::Message::WIFI_RETRYING:
         return "Retrying...";
+    case DisplayTask::Message::WAIT_SYNC:
+        return "Wait for sync...";
+    case DisplayTask::Message::NONE:
+        return "";
     }
     return "Unknown";
 }
@@ -70,9 +78,21 @@ void print_message(PicoU8g2::I2cHal &display, DisplayTask::Message message) {
                       to_string(message).data());
 }
 
+void message_timer_cb(TimerHandle_t handle) {
+    auto *const display_task =
+        static_cast<DisplayTask *>(pvTimerGetTimerID(handle));
+
+    display_task->clearMessage();
+}
+
 } // namespace
 
 void DisplayTask::taskFunc() {
+    StaticTimer_t message_timer_buffer{};
+    auto *message_timer =
+        xTimerCreateStatic("DisplyMsgTmr", pdMS_TO_TICKS(2000), pdFALSE, this,
+                           message_timer_cb, &message_timer_buffer);
+
     while (true) {
         const auto message = m_signals.take();
 
@@ -82,15 +102,29 @@ void DisplayTask::taskFunc() {
             [&](auto &&msg) {
                 using T = std::decay_t<decltype(msg)>;
                 if constexpr (std::is_same_v<T, datetime_t>) {
-                    print_time(m_display, msg);
-                    print_date(m_display, msg);
+                    m_datetime = msg;
                 } else if constexpr (std::is_same_v<T, Message>) {
-                    print_message(m_display, msg);
+                    m_message = msg;
+                    if (m_message != Message::NONE) {
+                        xTimerReset(message_timer, 0);
+                    }
                 } else {
                     static_assert(false, "non-exhaustive visitor!");
                 }
             },
             message);
+
+        if (m_datetime) {
+            print_time(m_display, *m_datetime);
+        }
+
+        if (m_message != Message::NONE) {
+            print_message(m_display, m_message);
+        } else if (m_datetime) {
+            print_date(m_display, *m_datetime);
+        } else {
+            print_message(m_display, Message::WAIT_SYNC);
+        }
 
         m_display.with_u8g2(u8g2_SendBuffer);
     }
@@ -99,5 +133,7 @@ void DisplayTask::taskFunc() {
 DisplayTask::MessageSignal_t::ptr_t DisplayTask::getMessageSignal() const {
     return m_message_signal;
 }
+
+void DisplayTask::clearMessage() { m_message_signal->signal(Message::NONE); }
 
 } // namespace RTRTClock::Tasks
