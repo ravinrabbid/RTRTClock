@@ -6,6 +6,7 @@ set(${LIB_NAME}_SOURCES
     lib/NtpClientTask.cpp
     lib/RtcTask.cpp
     lib/StartUpTask.cpp
+    lib/TemperatureTask.cpp
     )
 
 add_library(${LIB_NAME}
@@ -23,6 +24,7 @@ target_include_directories(${LIB_NAME}
 
 target_link_libraries(${LIB_NAME}
     PRIVATE
+        hardware_adc
         hardware_rtc
         pico_cyw43_arch_lwip_sys_freertos
         pico_time

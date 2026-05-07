@@ -78,6 +78,36 @@ void print_message(PicoU8g2::I2cHal &display, DisplayTask::Message message) {
                       to_string(message).data());
 }
 
+void print_temperature(PicoU8g2::I2cHal &display, float temperature) {
+    std::array<char, 8> temperature_str{};
+
+    snprintf(temperature_str.data(), temperature_str.size(),
+             "%.1f"
+             "\xb0"
+             "C",
+             temperature);
+
+    display.with_u8g2(u8g2_SetFont, u8g2_font_pxplusibmvga8_mf);
+    display.with_u8g2(u8g2_SetFontPosBottom);
+
+    const auto temperature_str_width =
+        display.with_u8g2(u8g2_GetStrWidth, temperature_str.data());
+
+    display.with_u8g2(u8g2_DrawStr,
+                      display.displayWidth() - temperature_str_width,
+                      display.displayHeight(), temperature_str.data());
+}
+
+DisplayTask::StatusBarMode nextMode(DisplayTask::StatusBarMode current) {
+    switch (current) {
+    case DisplayTask::StatusBarMode::DATE:
+        return DisplayTask::StatusBarMode::TEMPERATURE;
+    case DisplayTask::StatusBarMode::TEMPERATURE:
+        return DisplayTask::StatusBarMode::DATE;
+    }
+    return current;
+}
+
 void message_timer_cb(TimerHandle_t handle) {
     auto *const display_task =
         static_cast<DisplayTask *>(pvTimerGetTimerID(handle));
@@ -85,13 +115,28 @@ void message_timer_cb(TimerHandle_t handle) {
     display_task->clearMessage();
 }
 
+void statusbar_cycle_timer_cb(TimerHandle_t handle) {
+    auto *const display_task =
+        static_cast<DisplayTask *>(pvTimerGetTimerID(handle));
+
+    display_task->cycleStatusBar();
+}
+
 } // namespace
 
 void DisplayTask::taskFunc() {
     StaticTimer_t message_timer_buffer{};
+    StaticTimer_t statusbar_cycle_timer_buffer{};
+
     auto *message_timer =
         xTimerCreateStatic("DisplyMsgTmr", pdMS_TO_TICKS(2000), pdFALSE, this,
                            message_timer_cb, &message_timer_buffer);
+
+    auto *statusbar_cycle_timer = xTimerCreateStatic(
+        "StatusBarTmr", pdMS_TO_TICKS(10000), pdTRUE, this,
+        statusbar_cycle_timer_cb, &statusbar_cycle_timer_buffer);
+
+    xTimerStart(statusbar_cycle_timer, 0);
 
     while (true) {
         const auto message = m_signals.take();
@@ -103,10 +148,18 @@ void DisplayTask::taskFunc() {
                 using T = std::decay_t<decltype(msg)>;
                 if constexpr (std::is_same_v<T, datetime_t>) {
                     m_datetime = msg;
+                } else if constexpr (std::is_same_v<T, float>) {
+                    m_temperature = msg;
                 } else if constexpr (std::is_same_v<T, Message>) {
                     m_message = msg;
                     if (m_message != Message::NONE) {
                         xTimerReset(message_timer, 0);
+                    }
+                } else if constexpr (std::is_same_v<T, Command>) {
+                    switch (msg) {
+                    case Command::CYCLE_STATUS_BAR:
+                        m_statusbar_mode = nextMode(m_statusbar_mode);
+                        break;
                     }
                 } else {
                     static_assert(false, "non-exhaustive visitor!");
@@ -121,11 +174,19 @@ void DisplayTask::taskFunc() {
         if (m_message != Message::NONE) {
             print_message(m_display, m_message);
         } else if (m_datetime) {
-            print_date(m_display, *m_datetime);
+            switch (m_statusbar_mode) {
+            case StatusBarMode::DATE: {
+                if (m_datetime) {
+                    print_date(m_display, *m_datetime);
+                }
+            } break;
+            case StatusBarMode::TEMPERATURE:
+                print_temperature(m_display, m_temperature);
+                break;
+            }
         } else {
             print_message(m_display, Message::WAIT_SYNC);
         }
-
         m_display.with_u8g2(u8g2_SendBuffer);
     }
 }
@@ -134,6 +195,14 @@ DisplayTask::MessageSignal_t::ptr_t DisplayTask::getMessageSignal() const {
     return m_message_signal;
 }
 
+DisplayTask::CommandSignal_t::ptr_t DisplayTask::getCommandSignal() const {
+    return m_command_signal;
+}
+
 void DisplayTask::clearMessage() { m_message_signal->signal(Message::NONE); }
+
+void DisplayTask::cycleStatusBar() {
+    m_command_signal->signal(Command::CYCLE_STATUS_BAR);
+}
 
 } // namespace RTRTClock::Tasks

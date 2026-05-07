@@ -16,3 +16,6 @@ cmake --build build
 ```
 
 The image will end up in `build/app/RTRTClock.uf2`.
+
+## Hardware
+

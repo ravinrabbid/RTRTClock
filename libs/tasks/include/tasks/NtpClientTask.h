@@ -7,7 +7,7 @@
 
 namespace RTRTClock::Tasks {
 
-class NtpClientTask : public StaticTask<configMINIMAL_STACK_SIZE + 256> {
+class NtpClientTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
   private:
     const std::string m_ntp_server;
     const uint32_t m_update_interval;
