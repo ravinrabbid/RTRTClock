@@ -25,6 +25,8 @@ inline constexpr float TEMPERATURE_OFFSET{-4.0};
 
 inline constexpr auto DISPLAY_CLOCK_MODE{
     Tasks::DisplayTask::ClockMode::CLOCK24H};
+inline constexpr auto DISPLAY_TEMPERATURE_UNIT{
+    Tasks::DisplayTask::TemperatureUnit::CELSIUS};
 inline constexpr Tasks::DisplayTask::Config_t DISPLAY_CONFIG = {
     .i2c_block = i2c1,
     .i2c_address = 0x3C,

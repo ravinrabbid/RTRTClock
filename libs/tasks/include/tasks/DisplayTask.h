@@ -24,6 +24,7 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
     enum class Command : uint8_t {
         CYCLE_STATUS_BAR,
         CYCLE_CLOCK_MODE,
+        CYCLE_TEMPERATURE_UNIT,
     };
 
     enum class StatusBarMode : uint8_t {
@@ -34,6 +35,11 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
     enum class ClockMode : uint8_t {
         CLOCK24H,
         CLOCK12H,
+    };
+
+    enum class TemperatureUnit : uint8_t {
+        CELSIUS,
+        FAHRENHEIT,
     };
 
     using Config_t = PicoU8g2::I2cHal::Config;
@@ -52,6 +58,7 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
 
     StatusBarMode m_statusbar_mode{StatusBarMode::DATE};
     ClockMode m_clock_mode;
+    TemperatureUnit m_temperature_unit;
 
     MessageSignal_t::ptr_t m_message_signal;
     CommandSignal_t::ptr_t m_command_signal;
@@ -60,12 +67,12 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
 
   public:
     DisplayTask(UBaseType_t priority, const Config_t &display_config,
-                ClockMode clock_mode,
+                ClockMode clock_mode, TemperatureUnit temperature_unit,
                 RtcTask::DatetimeSignal_t::ptr_t minute_signal,
                 TemperatureTask::TemperatureSignal_t::ptr_t temperature_signal)
         : StaticTask{"Display Task", priority},
           m_display{display_config, u8g2_Setup_ssd1306_i2c_128x64_noname_f},
-          m_clock_mode{clock_mode},
+          m_clock_mode{clock_mode}, m_temperature_unit{temperature_unit},
           m_message_signal(std::make_shared<MessageSignal_t>()),
           m_command_signal(std::make_shared<CommandSignal_t>()),
           m_signals(std::move(minute_signal), std::move(temperature_signal),
@@ -78,6 +85,7 @@ class DisplayTask : public StaticTask<configMINIMAL_STACK_SIZE + 128> {
 
     void cycleStatusBarMode();
     void cycleClockMode();
+    void cycleTemperatureUnit();
 };
 
 } // namespace RTRTClock::Tasks

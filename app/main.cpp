@@ -29,10 +29,11 @@ void launch_tasks() {
                                          Config::NTP_SERVER,          //
                                          Config::NTP_UPDATE_INTERVAL, //
                                          rtc_task.getNtpUpdateSignal()};
-    Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 1UL,     //
-                                    Config::DISPLAY_CONFIG,     //
-                                    Config::DISPLAY_CLOCK_MODE, //
-                                    rtc_task.getMinuteSignal(), //
+    Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 1UL,           //
+                                    Config::DISPLAY_CONFIG,           //
+                                    Config::DISPLAY_CLOCK_MODE,       //
+                                    Config::DISPLAY_TEMPERATURE_UNIT, //
+                                    rtc_task.getMinuteSignal(),       //
                                     temperature_task.getTemperatureSignal()};
 
     std::array tasks{

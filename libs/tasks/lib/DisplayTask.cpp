@@ -96,14 +96,26 @@ void print_message(PicoU8g2::I2cHal &display, DisplayTask::Message message) {
                       to_string(message).data());
 }
 
-void print_temperature(PicoU8g2::I2cHal &display, float temperature) {
+void print_temperature(PicoU8g2::I2cHal &display, float temperature,
+                       DisplayTask::TemperatureUnit unit) {
     std::array<char, 8> temperature_str{};
 
-    snprintf(temperature_str.data(), temperature_str.size(),
-             "%.1f"
-             "\xb0"
-             "C",
-             temperature);
+    switch (unit) {
+    case DisplayTask::TemperatureUnit::CELSIUS:
+        snprintf(temperature_str.data(), temperature_str.size(),
+                 "%.1f"
+                 "\xb0"
+                 "C",
+                 temperature);
+        break;
+    case DisplayTask::TemperatureUnit::FAHRENHEIT:
+        snprintf(temperature_str.data(), temperature_str.size(),
+                 "%.1f"
+                 "\xb0"
+                 "F",
+                 (temperature * (9.0 / 5.0)) + 32);
+        break;
+    }
 
     display.with_u8g2(u8g2_SetFont, u8g2_font_pxplusibmvga8_mf);
     display.with_u8g2(u8g2_SetFontPosBottom);
@@ -173,6 +185,16 @@ DisplayTask::ClockMode nextMode(DisplayTask::ClockMode current) {
     return current;
 }
 
+DisplayTask::TemperatureUnit nextMode(DisplayTask::TemperatureUnit current) {
+    switch (current) {
+    case DisplayTask::TemperatureUnit::CELSIUS:
+        return DisplayTask::TemperatureUnit::FAHRENHEIT;
+    case DisplayTask::TemperatureUnit::FAHRENHEIT:
+        return DisplayTask::TemperatureUnit::CELSIUS;
+    }
+    return current;
+}
+
 void message_timer_cb(TimerHandle_t handle) {
     auto *const display_task =
         static_cast<DisplayTask *>(pvTimerGetTimerID(handle));
@@ -228,6 +250,9 @@ void DisplayTask::taskFunc() {
                     case Command::CYCLE_CLOCK_MODE:
                         m_clock_mode = nextMode(m_clock_mode);
                         break;
+                    case Command::CYCLE_TEMPERATURE_UNIT:
+                        m_temperature_unit = nextMode(m_temperature_unit);
+                        break;
                     }
                 } else {
                     static_assert(false, "non-exhaustive visitor!");
@@ -250,7 +275,7 @@ void DisplayTask::taskFunc() {
             } break;
             case StatusBarMode::TEMPERATURE:
                 print_wifi(m_display);
-                print_temperature(m_display, m_temperature);
+                print_temperature(m_display, m_temperature, m_temperature_unit);
                 break;
             }
         } else {
@@ -276,6 +301,10 @@ void DisplayTask::cycleStatusBarMode() {
 
 void DisplayTask::cycleClockMode() {
     m_command_signal->signal(Command::CYCLE_CLOCK_MODE);
+}
+
+void DisplayTask::cycleTemperatureUnit() {
+    m_command_signal->signal(Command::CYCLE_TEMPERATURE_UNIT);
 }
 
 } // namespace RTRTClock::Tasks
