@@ -1,5 +1,6 @@
 #include "tasks/DisplayTask.h"
 
+#include "pico/cyw43_arch.h"
 #include "timers.h"
 
 #include <array>
@@ -98,6 +99,43 @@ void print_temperature(PicoU8g2::I2cHal &display, float temperature) {
                       display.displayHeight(), temperature_str.data());
 }
 
+void print_wifi(PicoU8g2::I2cHal &display) {
+    std::array<char, 7> wifi_str{};
+
+    int32_t rssi = 0;
+
+    cyw43_arch_lwip_begin();
+    const int link_status =
+        cyw43_tcpip_link_status(&cyw43_state, CYW43_ITF_STA);
+    if (link_status == CYW43_LINK_UP) {
+        cyw43_wifi_get_rssi(&cyw43_state, &rssi);
+    }
+    cyw43_arch_lwip_end();
+
+    const auto rssi_to_percent = [](int32_t rssi) -> uint8_t {
+        if (rssi >= -30) {
+            return 100;
+        }
+        if (rssi <= -90) {
+            return 0;
+        }
+        return (rssi + 90) * 100 / 60;
+    };
+
+    if (link_status == CYW43_LINK_UP) {
+        snprintf(wifi_str.data(), wifi_str.size(), "W:%3d%%",
+                 rssi_to_percent(rssi));
+    } else {
+        snprintf(wifi_str.data(), wifi_str.size(), "W: NC");
+    }
+
+    display.with_u8g2(u8g2_SetFont, u8g2_font_pxplusibmvga8_mf);
+    display.with_u8g2(u8g2_SetFontPosBottom);
+
+    display.with_u8g2(u8g2_DrawStr, 0, display.displayHeight(),
+                      wifi_str.data());
+}
+
 DisplayTask::StatusBarMode nextMode(DisplayTask::StatusBarMode current) {
     switch (current) {
     case DisplayTask::StatusBarMode::DATE:
@@ -181,6 +219,7 @@ void DisplayTask::taskFunc() {
                 }
             } break;
             case StatusBarMode::TEMPERATURE:
+                print_wifi(m_display);
                 print_temperature(m_display, m_temperature);
                 break;
             }
