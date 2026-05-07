@@ -31,6 +31,7 @@ void launch_tasks() {
                                          rtc_task.getNtpUpdateSignal()};
     Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 1UL,     //
                                     Config::DISPLAY_CONFIG,     //
+                                    Config::DISPLAY_CLOCK_MODE, //
                                     rtc_task.getMinuteSignal(), //
                                     temperature_task.getTemperatureSignal()};
 

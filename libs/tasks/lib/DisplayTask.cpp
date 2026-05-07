@@ -16,11 +16,17 @@ constexpr std::array<std::string_view, 12> MONTHS_STR = {
 constexpr std::array<std::string_view, 7> DAYS_STR = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
-void print_time(PicoU8g2::I2cHal &display, const datetime_t &dt) {
+void print_time(PicoU8g2::I2cHal &display, const datetime_t &dt,
+                DisplayTask::ClockMode mode) {
     std::array<char, 3> hour_str{};
     std::array<char, 3> min_str{};
 
-    snprintf(hour_str.data(), hour_str.size(), "%02u", dt.hour);
+    auto hour = dt.hour;
+    if (mode == DisplayTask::ClockMode::CLOCK12H) {
+        hour = (hour > 12) ? static_cast<int8_t>(hour - 12) : hour;
+    }
+
+    snprintf(hour_str.data(), hour_str.size(), "%2u", hour);
     snprintf(min_str.data(), min_str.size(), "%02u", dt.min);
 
     display.with_u8g2(u8g2_SetFont, u8g2_font_7Segments_26x42_mn);
@@ -37,6 +43,17 @@ void print_time(PicoU8g2::I2cHal &display, const datetime_t &dt) {
                       U8G2_DRAW_ALL);
     display.with_u8g2(u8g2_DrawDisc, (display.displayWidth() / 2) - 1, 31, 2,
                       U8G2_DRAW_ALL);
+
+    if (mode == DisplayTask::ClockMode::CLOCK12H) {
+        display.with_u8g2(u8g2_SetFont, u8g2_font_pxplusibmvga8_mr);
+        display.with_u8g2(u8g2_SetFontPosTop);
+
+        if (dt.hour > 12) {
+            display.with_u8g2(u8g2_DrawStr, 0, 0, "PM");
+        } else {
+            display.with_u8g2(u8g2_DrawStr, 0, 0, "AM");
+        }
+    }
 }
 
 void print_date(PicoU8g2::I2cHal &display, const datetime_t &dt) {
@@ -146,6 +163,16 @@ DisplayTask::StatusBarMode nextMode(DisplayTask::StatusBarMode current) {
     return current;
 }
 
+DisplayTask::ClockMode nextMode(DisplayTask::ClockMode current) {
+    switch (current) {
+    case DisplayTask::ClockMode::CLOCK24H:
+        return DisplayTask::ClockMode::CLOCK12H;
+    case DisplayTask::ClockMode::CLOCK12H:
+        return DisplayTask::ClockMode::CLOCK24H;
+    }
+    return current;
+}
+
 void message_timer_cb(TimerHandle_t handle) {
     auto *const display_task =
         static_cast<DisplayTask *>(pvTimerGetTimerID(handle));
@@ -157,7 +184,7 @@ void statusbar_cycle_timer_cb(TimerHandle_t handle) {
     auto *const display_task =
         static_cast<DisplayTask *>(pvTimerGetTimerID(handle));
 
-    display_task->cycleStatusBar();
+    display_task->cycleStatusBarMode();
 }
 
 } // namespace
@@ -198,6 +225,9 @@ void DisplayTask::taskFunc() {
                     case Command::CYCLE_STATUS_BAR:
                         m_statusbar_mode = nextMode(m_statusbar_mode);
                         break;
+                    case Command::CYCLE_CLOCK_MODE:
+                        m_clock_mode = nextMode(m_clock_mode);
+                        break;
                     }
                 } else {
                     static_assert(false, "non-exhaustive visitor!");
@@ -206,7 +236,7 @@ void DisplayTask::taskFunc() {
             message);
 
         if (m_datetime) {
-            print_time(m_display, *m_datetime);
+            print_time(m_display, *m_datetime, m_clock_mode);
         }
 
         if (m_message != Message::NONE) {
@@ -240,8 +270,12 @@ DisplayTask::CommandSignal_t::ptr_t DisplayTask::getCommandSignal() const {
 
 void DisplayTask::clearMessage() { m_message_signal->signal(Message::NONE); }
 
-void DisplayTask::cycleStatusBar() {
+void DisplayTask::cycleStatusBarMode() {
     m_command_signal->signal(Command::CYCLE_STATUS_BAR);
+}
+
+void DisplayTask::cycleClockMode() {
+    m_command_signal->signal(Command::CYCLE_CLOCK_MODE);
 }
 
 } // namespace RTRTClock::Tasks
