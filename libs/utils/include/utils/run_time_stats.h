@@ -3,7 +3,7 @@
 
 namespace RTRTClock::Utils::RunTimeStats {
 
-void print_stats_task_create();
+void print_stats_task_create(UBaseType_t priority);
 
 } // namespace RTRTClock::Utils::RunTimeStats
 

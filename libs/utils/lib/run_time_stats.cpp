@@ -143,13 +143,13 @@ void print_stats_task_func(void *params) {
 
 } // namespace
 
-void print_stats_task_create() {
+void print_stats_task_create(UBaseType_t priority) {
     static std::array<StackType_t, TASK_STACK_SIZE> print_stats_task_stack;
     static StaticTask_t print_stats_task_buffer;
 
     xTaskCreateStatic(print_stats_task_func, "Print Stats", TASK_STACK_SIZE,
-                      nullptr, tskIDLE_PRIORITY + 1UL,
-                      print_stats_task_stack.data(), &print_stats_task_buffer);
+                      nullptr, priority, print_stats_task_stack.data(),
+                      &print_stats_task_buffer);
 }
 
 } // namespace RTRTClock::Utils::RunTimeStats
@@ -160,7 +160,7 @@ uint64_t get_run_time_counter_value() { return time_us_64(); }
 
 namespace RTRTClock::Utils::RunTimeStats {
 
-void print_stats_task_create() {}
+void print_stats_task_create(UBaseType_t priority) { (void)priority; }
 
 } // namespace RTRTClock::Utils::RunTimeStats
 

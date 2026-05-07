@@ -13,23 +13,25 @@ using namespace RTRTClock;
 
 namespace {
 
-// constexpr UBaseType_t LOW_PRIO = tskIDLE_PRIORITY + 1;
-// constexpr UBaseType_t MEDIUM_PRIO = tskIDLE_PRIORITY + 2;
-// constexpr UBaseType_t HIGH_PRIO = tskIDLE_PRIORITY + 3;
+constexpr UBaseType_t LOWEST_PRIO = tskIDLE_PRIORITY + 1;
+constexpr UBaseType_t LOW_PRIO = tskIDLE_PRIORITY + 2;
+constexpr UBaseType_t MEDIUM_PRIO = tskIDLE_PRIORITY + 3;
+constexpr UBaseType_t HIGH_PRIO = tskIDLE_PRIORITY + 4;
+constexpr UBaseType_t HIGHEST_PRIO = tskIDLE_PRIORITY + 5;
 
 void launch_tasks() {
-    Tasks::LedBlinkTask led_task{tskIDLE_PRIORITY + 3UL, 200};
-    Tasks::LedBlinkTask led_task2{tskIDLE_PRIORITY + 3UL, 500};
-    Tasks::RtcTask rtc_task{tskIDLE_PRIORITY + 2UL, Config::RTC_TZ};
+    Tasks::LedBlinkTask led_task{LOWEST_PRIO, 1000};
+
+    Tasks::RtcTask rtc_task{HIGHEST_PRIO, Config::RTC_TZ};
     Tasks::TemperatureTask temperature_task{
-        tskIDLE_PRIORITY + 1UL,              //
+        MEDIUM_PRIO,                         //
         Config::TEMPERATURE_UPDATE_INTERVAL, //
         Config::TEMPERATURE_OFFSET};
-    Tasks::NtpClientTask ntp_client_task{tskIDLE_PRIORITY + 1UL,      //
+    Tasks::NtpClientTask ntp_client_task{MEDIUM_PRIO,                 //
                                          Config::NTP_SERVER,          //
                                          Config::NTP_UPDATE_INTERVAL, //
                                          rtc_task.getNtpUpdateSignal()};
-    Tasks::DisplayTask display_task{tskIDLE_PRIORITY + 1UL,           //
+    Tasks::DisplayTask display_task{HIGH_PRIO,                        //
                                     Config::DISPLAY_CONFIG,           //
                                     Config::DISPLAY_CLOCK_MODE,       //
                                     Config::DISPLAY_TEMPERATURE_UNIT, //
@@ -38,7 +40,6 @@ void launch_tasks() {
 
     std::array tasks{
         std::ref<Tasks::Task>(led_task),         //
-        std::ref<Tasks::Task>(led_task2),        //
         std::ref<Tasks::Task>(rtc_task),         //
         std::ref<Tasks::Task>(temperature_task), //
         std::ref<Tasks::Task>(ntp_client_task),  //
@@ -46,8 +47,8 @@ void launch_tasks() {
     };
 
     Tasks::StartUpTask startup_task{
-        tskIDLE_PRIORITY + 1UL, //
-        tasks,                  //
+        LOW_PRIO, //
+        tasks,    //
         Tasks::StartUpTask::WifiConfig{.ssid = std::string{Config::WIFI_SSID},
                                        .password =
                                            std::string{Config::WIFI_PASSWORD},
@@ -58,7 +59,7 @@ void launch_tasks() {
 
     startup_task.create();
 
-    Utils::RunTimeStats::print_stats_task_create();
+    Utils::RunTimeStats::print_stats_task_create(LOWEST_PRIO);
 
     vTaskStartScheduler();
 
